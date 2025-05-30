@@ -1,22 +1,69 @@
-
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Download } from 'lucide-react';
+import { Download, Save } from 'lucide-react';
 import { OfferData } from '@/types/offer';
 import { generatePDF } from '@/utils/pdfGenerator';
-import { format } from 'date-fns';
+import { saveOffer, updateOffer } from '@/utils/offerStorage';
+import { useToast } from '@/hooks/use-toast';
 
 interface PDFPreviewProps {
   offerData: OfferData;
+  editingOffer?: any;
+  onOfferSaved?: () => void;
 }
 
-export const PDFPreview: React.FC<PDFPreviewProps> = ({ offerData }) => {
+export const PDFPreview: React.FC<PDFPreviewProps> = ({ 
+  offerData, 
+  editingOffer,
+  onOfferSaved 
+}) => {
   const previewRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const handleGeneratePDF = async () => {
     if (previewRef.current) {
       await generatePDF(previewRef.current, offerData.name || 'Travel Offer');
+      
+      // Save offer after successful PDF generation
+      await handleSaveOffer();
+    }
+  };
+
+  const handleSaveOffer = async () => {
+    if (!offerData.name) {
+      toast({
+        title: "خطأ",
+        description: "يرجى إدخال اسم العرض قبل الحفظ",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (editingOffer) {
+        await updateOffer(editingOffer.id, offerData);
+        toast({
+          title: "تم التحديث",
+          description: "تم تحديث العرض بنجاح",
+        });
+      } else {
+        await saveOffer(offerData);
+        toast({
+          title: "تم الحفظ",
+          description: "تم حفظ العرض بنجاح",
+        });
+      }
+      
+      if (onOfferSaved) {
+        onOfferSaved();
+      }
+    } catch (error: any) {
+      toast({
+        title: "خطأ في الحفظ",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -42,6 +89,14 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ offerData }) => {
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
+        <Button
+          onClick={handleSaveOffer}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+          disabled={!offerData.name}
+        >
+          <Save className="w-4 h-4" />
+          {editingOffer ? 'تحديث العرض' : 'حفظ العرض'}
+        </Button>
         <Button
           onClick={handleGeneratePDF}
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"

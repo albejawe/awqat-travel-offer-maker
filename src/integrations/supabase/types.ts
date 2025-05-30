@@ -9,7 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      travel_offers: {
+        Row: {
+          additional_info: string | null
+          airline: string | null
+          airport: string | null
+          base_price: string | null
+          car_type: string | null
+          country: string | null
+          created_at: string
+          custom_airline: string | null
+          custom_airport: string | null
+          custom_country: string | null
+          departure_date: string | null
+          departure_time: string | null
+          description: string | null
+          destination: string | null
+          hotel: string | null
+          id: string
+          image_url: string | null
+          name: string
+          number_of_people: string | null
+          pricing_tiers: Json | null
+          return_date: string | null
+          return_time: string | null
+          room_type: string | null
+          transportation: string | null
+          travel_dates: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_info?: string | null
+          airline?: string | null
+          airport?: string | null
+          base_price?: string | null
+          car_type?: string | null
+          country?: string | null
+          created_at?: string
+          custom_airline?: string | null
+          custom_airport?: string | null
+          custom_country?: string | null
+          departure_date?: string | null
+          departure_time?: string | null
+          description?: string | null
+          destination?: string | null
+          hotel?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          number_of_people?: string | null
+          pricing_tiers?: Json | null
+          return_date?: string | null
+          return_time?: string | null
+          room_type?: string | null
+          transportation?: string | null
+          travel_dates?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_info?: string | null
+          airline?: string | null
+          airport?: string | null
+          base_price?: string | null
+          car_type?: string | null
+          country?: string | null
+          created_at?: string
+          custom_airline?: string | null
+          custom_airport?: string | null
+          custom_country?: string | null
+          departure_date?: string | null
+          departure_time?: string | null
+          description?: string | null
+          destination?: string | null
+          hotel?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          number_of_people?: string | null
+          pricing_tiers?: Json | null
+          return_date?: string | null
+          return_time?: string | null
+          room_type?: string | null
+          transportation?: string | null
+          travel_dates?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
