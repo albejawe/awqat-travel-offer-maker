@@ -25,37 +25,35 @@ export const saveOffer = async (offerData: OfferData) => {
       imageUrl = publicUrl;
     }
 
-    // Save offer to database
+    // Save offer to database - removed array brackets
     const { data, error } = await supabase
       .from('travel_offers')
-      .insert([
-        {
-          name: offerData.name,
-          destination: offerData.destination,
-          country: offerData.country,
-          custom_country: offerData.customCountry,
-          departure_date: offerData.departureDate,
-          departure_time: offerData.departureTime,
-          return_date: offerData.returnDate,
-          return_time: offerData.returnTime,
-          airline: offerData.airline,
-          custom_airline: offerData.customAirline,
-          airport: offerData.airport,
-          custom_airport: offerData.customAirport,
-          hotel: offerData.hotel,
-          room_type: offerData.roomType,
-          number_of_people: offerData.numberOfPeople,
-          transportation: offerData.transportation,
-          car_type: offerData.carType,
-          base_price: offerData.basePrice,
-          pricing_tiers: offerData.pricingTiers,
-          image_url: imageUrl,
-          description: offerData.description,
-          travel_dates: offerData.travelDates,
-          additional_info: offerData.additionalInfo,
-          user_id: (await supabase.auth.getUser()).data.user?.id
-        }
-      ])
+      .insert({
+        name: offerData.name,
+        destination: offerData.destination,
+        country: offerData.country,
+        custom_country: offerData.customCountry,
+        departure_date: offerData.departureDate,
+        departure_time: offerData.departureTime,
+        return_date: offerData.returnDate,
+        return_time: offerData.returnTime,
+        airline: offerData.airline,
+        custom_airline: offerData.customAirline,
+        airport: offerData.airport,
+        custom_airport: offerData.customAirport,
+        hotel: offerData.hotel,
+        room_type: offerData.roomType,
+        number_of_people: offerData.numberOfPeople,
+        transportation: offerData.transportation,
+        car_type: offerData.carType,
+        base_price: offerData.basePrice,
+        pricing_tiers: offerData.pricingTiers,
+        image_url: imageUrl,
+        description: offerData.description,
+        travel_dates: offerData.travelDates,
+        additional_info: offerData.additionalInfo,
+        user_id: (await supabase.auth.getUser()).data.user?.id
+      })
       .select()
       .single();
 

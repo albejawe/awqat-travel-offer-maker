@@ -11,7 +11,6 @@ import { LogOut, Plus, List } from 'lucide-react';
 
 export const TravelOfferCreator = () => {
   const { user, loading, signOut } = useAuth();
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'create' | 'saved'>('create');
   const [editingOffer, setEditingOffer] = useState<any>(null);
   const [offerData, setOfferData] = useState<OfferData>({
@@ -118,25 +117,23 @@ export const TravelOfferCreator = () => {
     );
   }
 
-  if (!user && !currentUser) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 flex items-center justify-center">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              Travel Offer Creator
+              منشئ العروض السياحية
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Create professional travel offers with ease
+              إنشاء عروض سياحية احترافية بسهولة
             </p>
           </div>
-          <Auth onAuthChange={setCurrentUser} />
+          <Auth onAuthChange={() => {}} />
         </div>
       </div>
     );
   }
-
-  const activeUser = user || currentUser;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50">
@@ -144,15 +141,15 @@ export const TravelOfferCreator = () => {
         <div className="flex justify-between items-center mb-8">
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              Travel Offer Creator
+              منشئ العروض السياحية
             </h1>
             <p className="text-lg text-gray-600">
-              Create professional travel offers with ease
+              إنشاء عروض سياحية احترافية بسهولة
             </p>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
-              مرحباً، {activeUser?.email}
+              مرحباً، {user?.email}
             </span>
             <Button variant="outline" onClick={signOut}>
               <LogOut className="w-4 h-4 mr-2" />
@@ -226,7 +223,7 @@ export const TravelOfferCreator = () => {
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
-            <SavedOffers onEditOffer={handleEditOffer} user={activeUser} />
+            <SavedOffers onEditOffer={handleEditOffer} user={user} />
           </div>
         )}
       </div>
