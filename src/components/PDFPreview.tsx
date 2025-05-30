@@ -27,15 +27,16 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ offerData }) => {
     return `https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop`;
   };
 
-  const formatDateRange = () => {
-    if (offerData.travelDates.start && offerData.travelDates.end) {
-      return `${format(offerData.travelDates.start, 'MMM dd')} - ${format(offerData.travelDates.end, 'MMM dd, yyyy')}`;
-    } else if (offerData.travelDates.start) {
-      return `Starting ${format(offerData.travelDates.start, 'MMM dd, yyyy')}`;
-    } else if (offerData.departureDate && offerData.returnDate) {
-      return `${offerData.departureDate} - ${offerData.returnDate}`;
-    }
-    return 'Dates to be confirmed';
+  const getCountryDisplay = () => {
+    return offerData.customCountry || offerData.country || '';
+  };
+
+  const getAirlineDisplay = () => {
+    return offerData.customAirline || offerData.airline || '';
+  };
+
+  const getAirportDisplay = () => {
+    return offerData.customAirport || offerData.airport || '';
   };
 
   return (
@@ -58,10 +59,9 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ offerData }) => {
               ref={previewRef}
               className="bg-white p-8 min-h-[600px] mx-auto"
               style={{ 
-                width: '794px', 
-                transform: 'scale(0.8)', 
-                transformOrigin: 'top center',
-                marginBottom: '-150px'
+                width: '210mm', 
+                fontFamily: 'Cairo, sans-serif',
+                direction: 'rtl'
               }}
             >
               {/* PDF Content Preview */}
@@ -72,9 +72,9 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ offerData }) => {
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
                       {offerData.name || 'عرض سياحي'}
                     </h1>
-                    {(offerData.destination || offerData.country) && (
+                    {(offerData.destination || getCountryDisplay()) && (
                       <p className="text-lg text-blue-600 font-semibold">
-                        📍 {offerData.destination}{offerData.country && `, ${offerData.country}`}
+                        📍 {offerData.destination}{getCountryDisplay() && `, ${getCountryDisplay()}`}
                       </p>
                     )}
                   </div>
@@ -85,8 +85,8 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ offerData }) => {
                       className="w-20 h-20 object-contain mb-2"
                     />
                     <div className="text-center">
-                      <h3 className="font-bold text-lg text-blue-600">Awqat Travel</h3>
-                      <p className="text-gray-600 font-medium">للسياحة والسفر</p>
+                      <h3 className="font-bold text-lg text-blue-600">شركة أوقات للسياحة والسفر</h3>
+                      <p className="text-gray-600 font-medium text-sm">حولي - شارع تونس - بناية هيا</p>
                     </div>
                   </div>
                 </div>
@@ -111,17 +111,25 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({ offerData }) => {
                       <h3 className="font-bold text-lg text-blue-800">معلومات الطيران</h3>
                     </div>
                     <div className="space-y-2 text-sm">
-                      {offerData.departureDate && (
-                        <p><span className="font-semibold">إقلاع الذهاب:</span> {offerData.departureDate}</p>
+                      {(offerData.departureDate || offerData.departureTime) && (
+                        <p>
+                          <span className="font-semibold">إقلاع الذهاب:</span> 
+                          {offerData.departureDate && ` ${offerData.departureDate}`}
+                          {offerData.departureTime && ` - ${offerData.departureTime}`}
+                        </p>
                       )}
-                      {offerData.returnDate && (
-                        <p><span className="font-semibold">إقلاع العودة:</span> {offerData.returnDate}</p>
+                      {(offerData.returnDate || offerData.returnTime) && (
+                        <p>
+                          <span className="font-semibold">إقلاع العودة:</span> 
+                          {offerData.returnDate && ` ${offerData.returnDate}`}
+                          {offerData.returnTime && ` - ${offerData.returnTime}`}
+                        </p>
                       )}
-                      {offerData.airline && (
-                        <p><span className="font-semibold">الطيران:</span> {offerData.airline}</p>
+                      {getAirlineDisplay() && (
+                        <p><span className="font-semibold">الطيران:</span> {getAirlineDisplay()}</p>
                       )}
-                      {offerData.airport && (
-                        <p><span className="font-semibold">المطار:</span> {offerData.airport}</p>
+                      {getAirportDisplay() && (
+                        <p><span className="font-semibold">المطار:</span> {getAirportDisplay()}</p>
                       )}
                     </div>
                   </div>

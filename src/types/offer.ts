@@ -13,10 +13,15 @@ export interface OfferData {
   name: string;
   destination: string;
   country?: string;
+  customCountry?: string;
   departureDate?: string;
+  departureTime?: string;
   returnDate?: string;
+  returnTime?: string;
   airline?: string;
+  customAirline?: string;
   airport?: string;
+  customAirport?: string;
   hotel?: string;
   roomType?: string;
   numberOfPeople?: string;

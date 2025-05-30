@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,7 +73,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ fontFamily: 'Cairo, sans-serif', direction: 'rtl' }}>
       {/* Basic Information */}
       <Card>
         <CardContent className="p-4">
@@ -88,21 +87,31 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.name}
                 onChange={(e) => setOfferData(prev => ({ ...prev, name: e.target.value }))}
                 className="mt-1"
+                dir="rtl"
               />
             </div>
 
             <div>
               <Label htmlFor="country">الدولة</Label>
-              <Select onValueChange={(value) => setOfferData(prev => ({ ...prev, country: value }))}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="اختر الدولة" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>{country}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select onValueChange={(value) => setOfferData(prev => ({ ...prev, country: value }))}>
+                  <SelectTrigger className="mt-1 flex-1">
+                    <SelectValue placeholder="اختر الدولة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country} value={country}>{country}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="أو اكتب الدولة"
+                  value={offerData.customCountry || ''}
+                  onChange={(e) => setOfferData(prev => ({ ...prev, customCountry: e.target.value }))}
+                  className="mt-1 flex-1"
+                  dir="rtl"
+                />
+              </div>
             </div>
 
             <div>
@@ -113,6 +122,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.destination}
                 onChange={(e) => setOfferData(prev => ({ ...prev, destination: e.target.value }))}
                 className="mt-1"
+                dir="rtl"
               />
             </div>
           </div>
@@ -126,54 +136,88 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="departureDate">إقلاع الذهاب</Label>
-                <Input
-                  id="departureDate"
-                  placeholder="مثال: 10-6"
-                  value={offerData.departureDate || ''}
-                  onChange={(e) => setOfferData(prev => ({ ...prev, departureDate: e.target.value }))}
-                  className="mt-1"
-                />
+                <Label>إقلاع الذهاب</Label>
+                <div className="space-y-2">
+                  <Input
+                    placeholder="التاريخ (مثال: 10-6)"
+                    value={offerData.departureDate || ''}
+                    onChange={(e) => setOfferData(prev => ({ ...prev, departureDate: e.target.value }))}
+                    className="mt-1"
+                    dir="rtl"
+                  />
+                  <Input
+                    placeholder="الوقت (مثال: 14:30)"
+                    value={offerData.departureTime || ''}
+                    onChange={(e) => setOfferData(prev => ({ ...prev, departureTime: e.target.value }))}
+                    dir="rtl"
+                  />
+                </div>
               </div>
 
               <div>
-                <Label htmlFor="returnDate">إقلاع العودة</Label>
+                <Label>إقلاع العودة</Label>
+                <div className="space-y-2">
+                  <Input
+                    placeholder="التاريخ (مثال: 20-6)"
+                    value={offerData.returnDate || ''}
+                    onChange={(e) => setOfferData(prev => ({ ...prev, returnDate: e.target.value }))}
+                    className="mt-1"
+                    dir="rtl"
+                  />
+                  <Input
+                    placeholder="الوقت (مثال: 16:45)"
+                    value={offerData.returnTime || ''}
+                    onChange={(e) => setOfferData(prev => ({ ...prev, returnTime: e.target.value }))}
+                    dir="rtl"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label>الطيران</Label>
+              <div className="flex gap-2">
+                <Select onValueChange={(value) => setOfferData(prev => ({ ...prev, airline: value }))}>
+                  <SelectTrigger className="mt-1 flex-1">
+                    <SelectValue placeholder="اختر شركة الطيران" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {airlines.map((airline) => (
+                      <SelectItem key={airline} value={airline}>{airline}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Input
-                  id="returnDate"
-                  placeholder="مثال: 20-6"
-                  value={offerData.returnDate || ''}
-                  onChange={(e) => setOfferData(prev => ({ ...prev, returnDate: e.target.value }))}
-                  className="mt-1"
+                  placeholder="أو اكتب اسم الطيران"
+                  value={offerData.customAirline || ''}
+                  onChange={(e) => setOfferData(prev => ({ ...prev, customAirline: e.target.value }))}
+                  className="mt-1 flex-1"
+                  dir="rtl"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="airline">الطيران</Label>
-              <Select onValueChange={(value) => setOfferData(prev => ({ ...prev, airline: value }))}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="اختر شركة الطيران" />
-                </SelectTrigger>
-                <SelectContent>
-                  {airlines.map((airline) => (
-                    <SelectItem key={airline} value={airline}>{airline}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="airport">المطار</Label>
-              <Select onValueChange={(value) => setOfferData(prev => ({ ...prev, airport: value }))}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="اختر المطار" />
-                </SelectTrigger>
-                <SelectContent>
-                  {airports.map((airport) => (
-                    <SelectItem key={airport} value={airport}>{airport}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>المطار</Label>
+              <div className="flex gap-2">
+                <Select onValueChange={(value) => setOfferData(prev => ({ ...prev, airport: value }))}>
+                  <SelectTrigger className="mt-1 flex-1">
+                    <SelectValue placeholder="اختر المطار" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {airports.map((airport) => (
+                      <SelectItem key={airport} value={airport}>{airport}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="أو اكتب اسم المطار"
+                  value={offerData.customAirport || ''}
+                  onChange={(e) => setOfferData(prev => ({ ...prev, customAirport: e.target.value }))}
+                  className="mt-1 flex-1"
+                  dir="rtl"
+                />
+              </div>
             </div>
           </div>
         </CardContent>
@@ -192,6 +236,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.hotel || ''}
                 onChange={(e) => setOfferData(prev => ({ ...prev, hotel: e.target.value }))}
                 className="mt-1"
+                dir="rtl"
               />
             </div>
 
@@ -218,6 +263,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.numberOfPeople || ''}
                 onChange={(e) => setOfferData(prev => ({ ...prev, numberOfPeople: e.target.value }))}
                 className="mt-1"
+                dir="rtl"
               />
             </div>
           </div>
@@ -237,6 +283,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.transportation || ''}
                 onChange={(e) => setOfferData(prev => ({ ...prev, transportation: e.target.value }))}
                 className="mt-1"
+                dir="rtl"
               />
             </div>
 
@@ -270,6 +317,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.basePrice}
                 onChange={(e) => setOfferData(prev => ({ ...prev, basePrice: e.target.value }))}
                 className="mt-1"
+                dir="rtl"
               />
             </div>
 
@@ -295,12 +343,14 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                     value={tier.label}
                     onChange={(e) => updatePricingTier(index, 'label', e.target.value)}
                     className="flex-1"
+                    dir="rtl"
                   />
                   <Input
                     placeholder="السعر"
                     value={tier.price}
                     onChange={(e) => updatePricingTier(index, 'price', e.target.value)}
                     className="flex-1"
+                    dir="rtl"
                   />
                   {offerData.pricingTiers.length > 1 && (
                     <Button
@@ -388,6 +438,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.description}
                 onChange={(e) => setOfferData(prev => ({ ...prev, description: e.target.value }))}
                 className="mt-1 min-h-[120px]"
+                dir="rtl"
               />
             </div>
 
@@ -399,6 +450,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({ offerData, setOfferData })
                 value={offerData.additionalInfo}
                 onChange={(e) => setOfferData(prev => ({ ...prev, additionalInfo: e.target.value }))}
                 className="mt-1"
+                dir="rtl"
               />
             </div>
           </div>
