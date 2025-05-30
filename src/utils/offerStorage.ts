@@ -25,7 +25,11 @@ export const saveOffer = async (offerData: OfferData) => {
       imageUrl = publicUrl;
     }
 
-    // Save offer to database - removed array brackets
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Save offer to database
     const { data, error } = await supabase
       .from('travel_offers')
       .insert({
@@ -52,7 +56,7 @@ export const saveOffer = async (offerData: OfferData) => {
         description: offerData.description,
         travel_dates: offerData.travelDates,
         additional_info: offerData.additionalInfo,
-        user_id: (await supabase.auth.getUser()).data.user?.id
+        user_id: user.id
       })
       .select()
       .single();
