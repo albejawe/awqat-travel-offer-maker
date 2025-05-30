@@ -12,6 +12,16 @@ export interface TravelDates {
 export interface OfferData {
   name: string;
   destination: string;
+  country?: string;
+  departureDate?: string;
+  returnDate?: string;
+  airline?: string;
+  airport?: string;
+  hotel?: string;
+  roomType?: string;
+  numberOfPeople?: string;
+  transportation?: string;
+  carType?: string;
   basePrice: string;
   pricingTiers: PricingTier[];
   image: File | null;

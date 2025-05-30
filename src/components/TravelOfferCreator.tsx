@@ -8,8 +8,18 @@ export const TravelOfferCreator = () => {
   const [offerData, setOfferData] = useState<OfferData>({
     name: '',
     destination: '',
+    country: '',
+    departureDate: '',
+    returnDate: '',
+    airline: '',
+    airport: '',
+    hotel: '',
+    roomType: '',
+    numberOfPeople: '',
+    transportation: '',
+    carType: '',
     basePrice: '',
-    pricingTiers: [{ label: 'Adult', price: '' }],
+    pricingTiers: [{ label: 'بالغ', price: '' }],
     image: null,
     description: '',
     travelDates: {
@@ -18,8 +28,6 @@ export const TravelOfferCreator = () => {
     },
     additionalInfo: ''
   });
-
-  const [showPreview, setShowPreview] = useState(false);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -30,7 +38,7 @@ export const TravelOfferCreator = () => {
               <span className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
                 1
               </span>
-              Create Your Travel Offer
+              إنشاء عرض سياحي
             </h2>
             <OfferForm offerData={offerData} setOfferData={setOfferData} />
           </div>
@@ -42,7 +50,7 @@ export const TravelOfferCreator = () => {
               <span className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
                 2
               </span>
-              Preview & Export
+              معاينة وتصدير
             </h2>
             <PDFPreview offerData={offerData} />
           </div>
