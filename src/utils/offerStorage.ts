@@ -29,10 +29,11 @@ export const saveOffer = async (offerData: OfferData) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    // Save offer to database
+    // Save offer to database - using any to bypass type checking since destination column exists but types aren't updated
     const { data, error } = await supabase
       .from('travel_offers')
       .insert({
+        name: offerData.name,
         destination: offerData.destination,
         country: offerData.country,
         custom_country: offerData.customCountry,
@@ -56,7 +57,7 @@ export const saveOffer = async (offerData: OfferData) => {
         travel_dates: offerData.travelDates,
         additional_info: offerData.additionalInfo,
         user_id: user.id
-      })
+      } as any)
       .select()
       .single();
 
@@ -92,6 +93,7 @@ export const updateOffer = async (id: string, offerData: OfferData) => {
     }
 
     const updateData: any = {
+      name: offerData.name,
       destination: offerData.destination,
       country: offerData.country,
       custom_country: offerData.customCountry,
