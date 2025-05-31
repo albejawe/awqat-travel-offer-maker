@@ -33,7 +33,6 @@ export const saveOffer = async (offerData: OfferData) => {
     const { data, error } = await supabase
       .from('travel_offers')
       .insert({
-        name: offerData.name,
         destination: offerData.destination,
         country: offerData.country,
         custom_country: offerData.customCountry,
@@ -93,7 +92,6 @@ export const updateOffer = async (id: string, offerData: OfferData) => {
     }
 
     const updateData: any = {
-      name: offerData.name,
       destination: offerData.destination,
       country: offerData.country,
       custom_country: offerData.customCountry,
