@@ -172,14 +172,14 @@ export const PublicOffers = () => {
                           عرض التفاصيل
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
-                        <DialogHeader>
-                          <DialogTitle className="text-right text-2xl text-blue-700">
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" style={{ direction: 'rtl' }}>
+                        <DialogHeader style={{ direction: 'rtl', textAlign: 'right' }}>
+                          <DialogTitle className="text-right text-2xl text-blue-700" style={{ textAlign: 'right' }}>
                             {selectedOffer?.name}
                           </DialogTitle>
                         </DialogHeader>
                         {selectedOffer && (
-                          <div className="space-y-6" dir="rtl">
+                          <div className="space-y-6" style={{ direction: 'rtl', textAlign: 'right' }}>
                             {selectedOffer.image_url && (
                               <img 
                                 src={selectedOffer.image_url} 
@@ -192,52 +192,52 @@ export const PublicOffers = () => {
                               />
                             )}
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="space-y-4">
-                                <h3 className="font-semibold text-lg text-gray-800 text-right">تفاصيل الرحلة</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ direction: 'rtl' }}>
+                              <div className="space-y-4" style={{ direction: 'rtl' }}>
+                                <h3 className="font-semibold text-lg text-gray-800" style={{ textAlign: 'right' }}>تفاصيل الرحلة</h3>
                                 {selectedOffer.destination && (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span>{selectedOffer.destination}</span>
+                                  <div className="flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-end' }}>
+                                    <span style={{ textAlign: 'right' }}>{selectedOffer.destination}</span>
                                     <MapPin className="w-4 h-4 text-blue-500" />
                                   </div>
                                 )}
                                 {selectedOffer.departure_date && (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span>المغادرة: {selectedOffer.departure_date} {selectedOffer.departure_time}</span>
+                                  <div className="flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-end' }}>
+                                    <span style={{ textAlign: 'right' }}>المغادرة: {selectedOffer.departure_date} {selectedOffer.departure_time}</span>
                                     <Calendar className="w-4 h-4 text-green-500" />
                                   </div>
                                 )}
                                 {selectedOffer.return_date && (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span>العودة: {selectedOffer.return_date} {selectedOffer.return_time}</span>
+                                  <div className="flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-end' }}>
+                                    <span style={{ textAlign: 'right' }}>العودة: {selectedOffer.return_date} {selectedOffer.return_time}</span>
                                     <Calendar className="w-4 h-4 text-red-500" />
                                   </div>
                                 )}
                                 {selectedOffer.number_of_people && (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span>عدد الأشخاص: {selectedOffer.number_of_people}</span>
+                                  <div className="flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-end' }}>
+                                    <span style={{ textAlign: 'right' }}>عدد الأشخاص: {selectedOffer.number_of_people}</span>
                                     <Users className="w-4 h-4 text-purple-500" />
                                   </div>
                                 )}
                               </div>
 
-                              <div className="space-y-4">
-                                <h3 className="font-semibold text-lg text-gray-800 text-right">خدمات الرحلة</h3>
+                              <div className="space-y-4" style={{ direction: 'rtl' }}>
+                                <h3 className="font-semibold text-lg text-gray-800" style={{ textAlign: 'right' }}>خدمات الرحلة</h3>
                                 {(selectedOffer.airline || selectedOffer.custom_airline) && (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span>الطيران: {selectedOffer.custom_airline || selectedOffer.airline}</span>
+                                  <div className="flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-end' }}>
+                                    <span style={{ textAlign: 'right' }}>الطيران: {selectedOffer.custom_airline || selectedOffer.airline}</span>
                                     <Plane className="w-4 h-4 text-blue-500" />
                                   </div>
                                 )}
                                 {selectedOffer.hotel && (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span>الفندق: {selectedOffer.hotel}</span>
+                                  <div className="flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-end' }}>
+                                    <span style={{ textAlign: 'right' }}>الفندق: {selectedOffer.hotel}</span>
                                     <Hotel className="w-4 h-4 text-orange-500" />
                                   </div>
                                 )}
                                 {selectedOffer.transportation && (
-                                  <div className="flex items-center justify-end gap-2">
-                                    <span>المواصلات: {selectedOffer.transportation}</span>
+                                  <div className="flex items-center gap-2" style={{ direction: 'rtl', justifyContent: 'flex-end' }}>
+                                    <span style={{ textAlign: 'right' }}>المواصلات: {selectedOffer.transportation}</span>
                                     <Car className="w-4 h-4 text-green-500" />
                                   </div>
                                 )}
@@ -245,8 +245,8 @@ export const PublicOffers = () => {
                             </div>
 
                             {selectedOffer.description && (
-                              <div className="text-right">
-                                <h3 className="font-semibold text-lg text-gray-800 mb-3">التفاصيل</h3>
+                              <div style={{ direction: 'rtl', textAlign: 'right' }}>
+                                <h3 className="font-semibold text-lg text-gray-800 mb-3" style={{ textAlign: 'right' }}>التفاصيل</h3>
                                 <div 
                                   className="text-gray-600 leading-relaxed whitespace-pre-wrap"
                                   style={{ 
@@ -262,12 +262,12 @@ export const PublicOffers = () => {
                             )}
 
                             {selectedOffer.pricing_tiers && selectedOffer.pricing_tiers.length > 0 && (
-                              <div className="text-right">
-                                <h3 className="font-semibold text-lg text-gray-800 mb-3">الأسعار</h3>
+                              <div style={{ direction: 'rtl', textAlign: 'right' }}>
+                                <h3 className="font-semibold text-lg text-gray-800 mb-3" style={{ textAlign: 'right' }}>الأسعار</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                   {selectedOffer.pricing_tiers.map((tier: any, index: number) => (
                                     <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                      <div className="flex justify-between items-center">
+                                      <div className="flex justify-between items-center" style={{ direction: 'rtl' }}>
                                         <span className="font-semibold text-green-600">{tier.price} د.ك</span>
                                         <span className="text-gray-700">{tier.label}</span>
                                       </div>
@@ -278,8 +278,8 @@ export const PublicOffers = () => {
                             )}
 
                             {selectedOffer.additional_info && (
-                              <div className="text-right">
-                                <h3 className="font-semibold text-lg text-gray-800 mb-3">معلومات إضافية</h3>
+                              <div style={{ direction: 'rtl', textAlign: 'right' }}>
+                                <h3 className="font-semibold text-lg text-gray-800 mb-3" style={{ textAlign: 'right' }}>معلومات إضافية</h3>
                                 <div 
                                   className="text-gray-600 whitespace-pre-wrap"
                                   style={{ 
@@ -342,7 +342,7 @@ export const PublicOffers = () => {
             <p>© 2024 شركة أوقات للسياحة والسفر. جميع الحقوق محفوظة.</p>
           </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
