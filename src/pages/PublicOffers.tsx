@@ -78,7 +78,7 @@ export const PublicOffers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50" dir="rtl">
       {/* Header */}
       <div className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-4">
@@ -126,6 +126,10 @@ export const PublicOffers = () => {
                       src={offer.image_url} 
                       alt={offer.name}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop';
+                      }}
                     />
                   </div>
                 )}
@@ -168,7 +172,7 @@ export const PublicOffers = () => {
                           عرض التفاصيل
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" dir="rtl">
                         <DialogHeader>
                           <DialogTitle className="text-right text-2xl text-blue-700">
                             {selectedOffer?.name}
@@ -181,6 +185,10 @@ export const PublicOffers = () => {
                                 src={selectedOffer.image_url} 
                                 alt={selectedOffer.name}
                                 className="w-full h-64 object-cover rounded-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop';
+                                }}
                               />
                             )}
                             
@@ -238,8 +246,10 @@ export const PublicOffers = () => {
 
                             {selectedOffer.description && (
                               <div>
-                                <h3 className="font-semibold text-lg text-gray-800 mb-2">وصف الرحلة</h3>
-                                <p className="text-gray-600 leading-relaxed">{selectedOffer.description}</p>
+                                <h3 className="font-semibold text-lg text-gray-800 mb-2">التفاصيل</h3>
+                                <div className="text-gray-600 leading-relaxed whitespace-pre-wrap" style={{ fontFamily: 'Arial, sans-serif', direction: 'rtl', unicodeBidi: 'embed' }}>
+                                  {selectedOffer.description}
+                                </div>
                               </div>
                             )}
 
@@ -262,7 +272,9 @@ export const PublicOffers = () => {
                             {selectedOffer.additional_info && (
                               <div>
                                 <h3 className="font-semibold text-lg text-gray-800 mb-2">معلومات إضافية</h3>
-                                <p className="text-gray-600">{selectedOffer.additional_info}</p>
+                                <div className="text-gray-600 whitespace-pre-wrap" style={{ fontFamily: 'Arial, sans-serif', direction: 'rtl', unicodeBidi: 'embed' }}>
+                                  {selectedOffer.additional_info}
+                                </div>
                               </div>
                             )}
 

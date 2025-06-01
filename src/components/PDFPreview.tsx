@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -270,9 +271,9 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({
                       <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white text-sm">📝</span>
                       </div>
-                      <h3 className="font-bold text-xl text-gray-800">تفاصيل العرض</h3>
+                      <h3 className="font-bold text-xl text-gray-800">التفاصيل</h3>
                     </div>
-                    <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base">
+                    <div className="text-gray-700 whitespace-pre-wrap leading-relaxed text-base" style={{ fontFamily: 'Arial, sans-serif', direction: 'rtl', unicodeBidi: 'embed' }}>
                       {offerData.description}
                     </div>
                   </div>
@@ -285,9 +286,9 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({
                       <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white text-sm">ℹ️</span>
                       </div>
-                      <h3 className="font-bold text-xl text-red-800">معلومات مهمة</h3>
+                      <h3 className="font-bold text-xl text-red-800">معلومات إضافية</h3>
                     </div>
-                    <div className="text-red-700 whitespace-pre-wrap leading-relaxed text-base">
+                    <div className="text-red-700 whitespace-pre-wrap leading-relaxed text-base" style={{ fontFamily: 'Arial, sans-serif', direction: 'rtl', unicodeBidi: 'embed' }}>
                       {offerData.additionalInfo}
                     </div>
                   </div>
