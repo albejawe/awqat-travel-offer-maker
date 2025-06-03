@@ -125,8 +125,9 @@ export const PublicOffers = () => {
               
               return (
                 <Card key={offer.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300" dir="rtl">
+                  {/* Show image first if available */}
                   {offer.image_url && (
-                    <div className="h-48 overflow-hidden">
+                    <div className="h-48 overflow-hidden relative">
                       <img 
                         src={offer.image_url} 
                         alt={offer.name}
@@ -136,10 +137,17 @@ export const PublicOffers = () => {
                           target.src = 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop';
                         }}
                       />
+                      {videoId && (
+                        <div className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded-md flex items-center gap-1">
+                          <Youtube className="w-3 h-3" />
+                          <span className="text-xs">فيديو</span>
+                        </div>
+                      )}
                     </div>
                   )}
                   
-                  {videoId && !offer.image_url && (
+                  {/* Show video if no image available */}
+                  {!offer.image_url && videoId && (
                     <div className="h-48 overflow-hidden">
                       <iframe
                         src={`https://www.youtube.com/embed/${videoId}`}
@@ -203,7 +211,7 @@ export const PublicOffers = () => {
                           </DialogHeader>
                           {selectedOffer && (
                             <div className="space-y-6" dir="rtl">
-                              {/* Show both image and video if both exist */}
+                              {/* Show image if available */}
                               {selectedOffer.image_url && (
                                 <div dir="rtl">
                                   <h3 className="font-semibold text-lg text-gray-800 mb-3 text-right">صورة العرض</h3>
@@ -219,6 +227,7 @@ export const PublicOffers = () => {
                                 </div>
                               )}
 
+                              {/* Show video if available */}
                               {selectedOffer.youtube_video && extractYouTubeVideoId(selectedOffer.youtube_video) && (
                                 <div dir="rtl">
                                   <h3 className="font-semibold text-lg text-gray-800 mb-3 text-right flex items-center justify-end gap-2">
