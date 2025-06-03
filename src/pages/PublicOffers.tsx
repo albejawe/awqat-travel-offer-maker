@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -202,6 +203,22 @@ export const PublicOffers = () => {
                           </DialogHeader>
                           {selectedOffer && (
                             <div className="space-y-6" dir="rtl">
+                              {/* Show both image and video if both exist */}
+                              {selectedOffer.image_url && (
+                                <div dir="rtl">
+                                  <h3 className="font-semibold text-lg text-gray-800 mb-3 text-right">صورة العرض</h3>
+                                  <img 
+                                    src={selectedOffer.image_url} 
+                                    alt={selectedOffer.name}
+                                    className="w-full h-64 object-cover rounded-lg"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.src = 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop';
+                                    }}
+                                  />
+                                </div>
+                              )}
+
                               {selectedOffer.youtube_video && extractYouTubeVideoId(selectedOffer.youtube_video) && (
                                 <div dir="rtl">
                                   <h3 className="font-semibold text-lg text-gray-800 mb-3 text-right flex items-center justify-end gap-2">
@@ -217,18 +234,6 @@ export const PublicOffers = () => {
                                     />
                                   </div>
                                 </div>
-                              )}
-                              
-                              {selectedOffer.image_url && (
-                                <img 
-                                  src={selectedOffer.image_url} 
-                                  alt={selectedOffer.name}
-                                  className="w-full h-64 object-cover rounded-lg"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop';
-                                  }}
-                                />
                               )}
                               
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6" dir="rtl">
