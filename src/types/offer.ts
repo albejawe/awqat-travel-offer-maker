@@ -33,4 +33,5 @@ export interface OfferData {
   description: string;
   travelDates: TravelDates;
   additionalInfo: string;
+  youtubeVideo?: string;
 }

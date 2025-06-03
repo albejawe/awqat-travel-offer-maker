@@ -39,7 +39,8 @@ export const TravelOfferCreator = () => {
       start: undefined,
       end: undefined
     },
-    additionalInfo: ''
+    additionalInfo: '',
+    youtubeVideo: ''
   });
 
   const handleEditOffer = (offer: any) => {
@@ -67,7 +68,8 @@ export const TravelOfferCreator = () => {
       image: null,
       description: offer.description || '',
       travelDates: offer.travel_dates || { start: undefined, end: undefined },
-      additionalInfo: offer.additional_info || ''
+      additionalInfo: offer.additional_info || '',
+      youtubeVideo: offer.youtube_video || ''
     });
     setEditingOffer(offer);
     setActiveTab('create');
@@ -101,7 +103,8 @@ export const TravelOfferCreator = () => {
         start: undefined,
         end: undefined
       },
-      additionalInfo: ''
+      additionalInfo: '',
+      youtubeVideo: ''
     });
     setActiveTab('create');
   };

@@ -5,18 +5,22 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { PlusCircle, Trash2, Upload } from 'lucide-react';
+import { PlusCircle, Trash2, Upload, Youtube } from 'lucide-react';
 import { OfferData, PricingTier } from '@/types/offer';
 import { DateRangePicker } from './DateRangePicker';
+import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
+
 interface OfferFormProps {
   offerData: OfferData;
   setOfferData: React.Dispatch<React.SetStateAction<OfferData>>;
 }
+
 const countries = ['Turkey', 'UAE', 'UK', 'France', 'Italy', 'Spain', 'Netherlands', 'Thailand', 'Japan', 'Singapore', 'Maldives', 'Indonesia', 'Egypt', 'Morocco', 'South Africa'];
 const airlines = ['الجزيرة', 'الخطوط السعودية', 'الطيران العربي', 'فلاي دبي', 'الاتحاد', 'الكويتية', 'Turkish Airlines', 'Emirates', 'Qatar Airways', 'Etihad', 'Flydubai'];
 const airports = ['اتاتورك', 'صبيحة كوكجن', 'دبي الدولي', 'ابو ظبي الدولي', 'الملك عبدالعزيز', 'الملك خالد الدولي', 'الكويت الدولي', 'حمد الدولي'];
 const roomTypes = ['سويت غرفه وصاله', 'غرفة مفردة', 'غرفة مزدوجة', 'غرفة ثلاثية', 'غرفة عائلية', 'جناح ملكي', 'استوديو'];
 const carTypes = ['مرسيدس ميني باص', 'تويوتا هايس', 'كوستر', 'سيارة عادية', 'سيارة فان', 'حافلة صغيرة', 'حافلة كبيرة'];
+
 export const OfferForm: React.FC<OfferFormProps> = ({
   offerData,
   setOfferData
@@ -56,6 +60,16 @@ export const OfferForm: React.FC<OfferFormProps> = ({
       }));
     }
   };
+  const handleYouTubeVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setOfferData(prev => ({
+      ...prev,
+      youtubeVideo: url
+    }));
+  };
+
+  const videoId = offerData.youtubeVideo ? extractYouTubeVideoId(offerData.youtubeVideo) : null;
+
   return <div className="space-y-6" style={{
     fontFamily: 'Cairo, sans-serif',
     direction: 'rtl'
@@ -308,10 +322,60 @@ export const OfferForm: React.FC<OfferFormProps> = ({
                   <input id="image" type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
               </div>
-              {offerData.image && <p className="text-sm text-green-600 mt-2">
+              {offerData.image && (
+                <p className="text-sm text-green-600 mt-2">
                   ✓ تم رفع {offerData.image.name}
-                </p>}
+                </p>
+              )}
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* YouTube Video */}
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-lg mb-4 text-gray-700">فيديو يوتيوب</h3>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="youtubeVideo">رابط فيديو يوتيوب</Label>
+              <div className="mt-1 relative">
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Youtube className="w-5 h-5 text-red-500" />
+                </div>
+                <Input
+                  id="youtubeVideo"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={offerData.youtubeVideo || ''}
+                  onChange={handleYouTubeVideoChange}
+                  className="pr-12"
+                  dir="ltr"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1 text-right">
+                يمكنك لصق رابط فيديو من يوتيوب هنا ليظهر في العرض
+              </p>
+            </div>
+            
+            {videoId && (
+              <div>
+                <Label>معاينة الفيديو</Label>
+                <div className="mt-2 w-full aspect-video">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}`}
+                    className="w-full h-full rounded-lg"
+                    allowFullScreen
+                    title="معاينة فيديو يوتيوب"
+                  />
+                </div>
+              </div>
+            )}
+            
+            {offerData.youtubeVideo && !videoId && (
+              <p className="text-sm text-red-600 mt-2">
+                ⚠️ الرابط غير صحيح. تأكد من أنه رابط يوتيوب صالح
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
