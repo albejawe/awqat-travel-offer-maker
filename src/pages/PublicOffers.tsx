@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail } from 'lucide-react';
 import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
 
-export const PublicOffers = () => {
+const PublicOffers = () => {
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
@@ -417,3 +416,7 @@ export const PublicOffers = () => {
     </div>
   );
 };
+
+// Add both named and default exports
+export { PublicOffers };
+export default PublicOffers;
