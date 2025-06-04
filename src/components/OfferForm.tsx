@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { PlusCircle, Trash2, Upload, Youtube } from 'lucide-react';
+import { PlusCircle, Trash2, Upload, Youtube, X } from 'lucide-react';
 import { OfferData, PricingTier } from '@/types/offer';
 import { DateRangePicker } from './DateRangePicker';
 import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
@@ -36,6 +36,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({
       }]
     }));
   };
+  
   const removePricingTier = (index: number) => {
     if (offerData.pricingTiers.length > 1) {
       setOfferData(prev => ({
@@ -44,6 +45,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({
       }));
     }
   };
+  
   const updatePricingTier = (index: number, field: keyof PricingTier, value: string) => {
     setOfferData(prev => ({
       ...prev,
@@ -53,15 +55,32 @@ export const OfferForm: React.FC<OfferFormProps> = ({
       } : tier)
     }));
   };
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setOfferData(prev => ({
         ...prev,
-        image: file
+        coverImage: file
       }));
     }
   };
+
+  const handleGalleryImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setOfferData(prev => ({
+      ...prev,
+      galleryImages: [...prev.galleryImages, ...files]
+    }));
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setOfferData(prev => ({
+      ...prev,
+      galleryImages: prev.galleryImages.filter((_, i) => i !== index)
+    }));
+  };
+  
   const handleYouTubeVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     setOfferData(prev => ({
@@ -303,10 +322,17 @@ export const OfferForm: React.FC<OfferFormProps> = ({
           <div className="space-y-4">
             <div>
               <Label htmlFor="basePrice">السعر الأساسي (اختياري)</Label>
-              <Input id="basePrice" placeholder="مثال: 1200 ريال" value={offerData.basePrice} onChange={e => setOfferData(prev => ({
-              ...prev,
-              basePrice: e.target.value
-            }))} className="mt-1" dir="rtl" />
+              <Input 
+                id="basePrice" 
+                placeholder="مثال: 1200 د.ك" 
+                value={offerData.basePrice} 
+                onChange={e => setOfferData(prev => ({
+                  ...prev,
+                  basePrice: e.target.value
+                }))} 
+                className="mt-1" 
+                dir="rtl" 
+              />
             </div>
 
             <div>
@@ -318,58 +344,114 @@ export const OfferForm: React.FC<OfferFormProps> = ({
                 </Button>
               </div>
 
-              {offerData.pricingTiers.map((tier, index) => <div key={index} className="flex gap-2 mb-2">
-                  <Input placeholder="التسمية (مثال: بالغ، طفل)" value={tier.label} onChange={e => updatePricingTier(index, 'label', e.target.value)} className="flex-1" dir="rtl" />
-                  <Input placeholder="السعر" value={tier.price} onChange={e => updatePricingTier(index, 'price', e.target.value)} className="flex-1" dir="rtl" />
-                  {offerData.pricingTiers.length > 1 && <Button type="button" variant="outline" size="sm" onClick={() => removePricingTier(index)} className="px-3">
+              {offerData.pricingTiers.map((tier, index) => (
+                <div key={index} className="flex gap-2 mb-2">
+                  <Input 
+                    placeholder="التسمية (مثال: بالغ، طفل)" 
+                    value={tier.label} 
+                    onChange={e => updatePricingTier(index, 'label', e.target.value)} 
+                    className="flex-1" 
+                    dir="rtl" 
+                  />
+                  <Input 
+                    placeholder="السعر (مثال: 250 د.ك)" 
+                    value={tier.price} 
+                    onChange={e => updatePricingTier(index, 'price', e.target.value)} 
+                    className="flex-1" 
+                    dir="rtl" 
+                  />
+                  {offerData.pricingTiers.length > 1 && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => removePricingTier(index)} className="px-3">
                       <Trash2 className="w-4 h-4" />
-                    </Button>}
-                </div>)}
+                    </Button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Image Upload */}
+      {/* Image Gallery */}
       <Card>
         <CardContent className="p-4">
-          <h3 className="font-semibold text-lg mb-4 text-gray-700">صورة العرض</h3>
-          <div className="space-y-4">
-            {/* Show existing image if editing */}
-            {editingOffer?.imageUrl && !offerData.image && (
-              <div className="mb-4">
-                <Label>الصورة الحالية</Label>
-                <div className="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg">
-                  <img 
-                    src={editingOffer.imageUrl} 
-                    alt="Current offer image" 
-                    className="w-full h-32 object-cover rounded-lg"
-                  />
-                  <p className="text-sm text-green-600 mt-2 text-center">
-                    ✓ صورة محفوظة - اختر صورة جديدة للاستبدال
-                  </p>
-                </div>
-              </div>
-            )}
-
+          <h3 className="font-semibold text-lg mb-4 text-gray-700">معرض الصور</h3>
+          <div className="space-y-6">
+            {/* Cover Image */}
             <div>
-              <Label htmlFor="image">رفع صورة {editingOffer?.imageUrl ? '(جديدة)' : ''}</Label>
+              <Label htmlFor="coverImage">الصورة الرئيسية</Label>
+              {editingOffer?.imageUrl && !offerData.coverImage && (
+                <div className="mb-4">
+                  <div className="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                    <img 
+                      src={editingOffer.imageUrl} 
+                      alt="Current cover image" 
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <p className="text-sm text-green-600 mt-2 text-center">
+                      ✓ صورة رئيسية محفوظة - اختر صورة جديدة للاستبدال
+                    </p>
+                  </div>
+                </div>
+              )}
+              
               <div className="mt-1 flex items-center justify-center w-full">
-                <label htmlFor="image" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                <label htmlFor="coverImage" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-8 h-8 mb-2 text-gray-500" />
                     <p className="mb-2 text-sm text-gray-500">
-                      <span className="font-semibold">اضغط للرفع</span> أو اسحب الصورة
+                      <span className="font-semibold">اضغط لرفع الصورة الرئيسية</span>
                     </p>
                     <p className="text-xs text-gray-500">PNG, JPG أو GIF (حد أقصى 10MB)</p>
                   </div>
-                  <input id="image" type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                  <input id="coverImage" type="file" className="hidden" accept="image/*" onChange={handleCoverImageUpload} />
                 </label>
               </div>
-              {offerData.image && (
+              {offerData.coverImage && (
                 <p className="text-sm text-green-600 mt-2">
-                  ✓ تم رفع {offerData.image.name}
+                  ✓ تم رفع {offerData.coverImage.name}
                 </p>
+              )}
+            </div>
+
+            {/* Gallery Images */}
+            <div>
+              <Label htmlFor="galleryImages">صور إضافية للمعرض</Label>
+              <div className="mt-1 flex items-center justify-center w-full">
+                <label htmlFor="galleryImages" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                    <p className="mb-2 text-sm text-gray-500">
+                      <span className="font-semibold">اضغط لرفع صور إضافية</span>
+                    </p>
+                    <p className="text-xs text-gray-500">يمكنك اختيار صور متعددة</p>
+                  </div>
+                  <input id="galleryImages" type="file" className="hidden" accept="image/*" multiple onChange={handleGalleryImagesUpload} />
+                </label>
+              </div>
+              
+              {offerData.galleryImages.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm text-green-600 mb-2">
+                    ✓ تم رفع {offerData.galleryImages.length} صور إضافية
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {offerData.galleryImages.map((file, index) => (
+                      <div key={index} className="relative">
+                        <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-600 p-2">
+                          {file.name.substring(0, 10)}...
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>

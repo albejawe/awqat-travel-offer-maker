@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail } from 'lucide-react';
+import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail, Play } from 'lucide-react';
 import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
+import { ImageGallery } from '@/components/ImageGallery';
 
 const PublicOffers = () => {
   const [offers, setOffers] = useState<any[]>([]);
@@ -41,6 +43,13 @@ const PublicOffers = () => {
 شكراً لكم`;
     
     return `https://wa.me/96522289080?text=${encodeURIComponent(message)}`;
+  };
+
+  const formatPrice = (price: string) => {
+    if (!price) return '';
+    // Remove existing currency symbols and add KWD in Arabic
+    const cleanPrice = price.replace(/ريال|د\.ك|KWD|SAR/gi, '').trim();
+    return `${cleanPrice} د.ك`;
   };
 
   if (loading) {
@@ -100,35 +109,17 @@ const PublicOffers = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {offers.map((offer) => {
               const videoId = offer.youtube_video ? extractYouTubeVideoId(offer.youtube_video) : null;
-              const getImageUrl = () => {
-                if (offer.image_url) {
-                  return offer.image_url;
-                }
-                return `https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop`;
-              };
+              const galleryImages = offer.gallery_images || [];
 
               return (
                 <Card key={offer.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white border-0 shadow-lg">
                   {/* Image/Video Section */}
-                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500">
-                    {offer.image_url ? (
-                      <img 
-                        src={getImageUrl()} 
-                        alt={offer.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white">
-                        <div className="text-center">
-                          <MapPin className="w-12 h-12 mx-auto mb-2" />
-                          <p className="text-lg font-semibold">{offer.destination}</p>
-                        </div>
-                      </div>
-                    )}
+                  <div className="relative h-48 overflow-hidden">
+                    <ImageGallery 
+                      coverImage={offer.image_url}
+                      galleryImages={galleryImages}
+                      altText={offer.name}
+                    />
                     
                     {/* Video Badge */}
                     {videoId && (
@@ -141,7 +132,7 @@ const PublicOffers = () => {
                     {/* Price Badge */}
                     {offer.base_price && (
                       <div className="absolute bottom-3 left-3 bg-amber-500 text-white px-4 py-2 rounded-full shadow-lg">
-                        <span className="font-bold text-lg">{offer.base_price}</span>
+                        <span className="font-bold text-lg">{formatPrice(offer.base_price)}</span>
                       </div>
                     )}
                   </div>
@@ -201,7 +192,7 @@ const PublicOffers = () => {
                             .map((tier, index) => (
                             <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded-lg">
                               <span className="font-medium text-gray-700">{tier.label}</span>
-                              <span className="font-bold text-amber-600">{tier.price}</span>
+                              <span className="font-bold text-amber-600">{formatPrice(tier.price)}</span>
                             </div>
                           ))}
                         </div>
@@ -226,20 +217,14 @@ const PublicOffers = () => {
                             </DialogHeader>
                             {selectedOffer && (
                               <div className="space-y-6" dir="rtl">
-                                {/* Image */}
-                                {selectedOffer.image_url && (
-                                  <div>
-                                    <img 
-                                      src={selectedOffer.image_url} 
-                                      alt={selectedOffer.name}
-                                      className="w-full h-64 object-cover rounded-lg shadow-lg"
-                                      onError={(e) => {
-                                        const target = e.target as HTMLImageElement;
-                                        target.src = 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop';
-                                      }}
-                                    />
-                                  </div>
-                                )}
+                                {/* Image Gallery */}
+                                <div className="h-64">
+                                  <ImageGallery 
+                                    coverImage={selectedOffer.image_url}
+                                    galleryImages={selectedOffer.gallery_images || []}
+                                    altText={selectedOffer.name}
+                                  />
+                                </div>
 
                                 {/* Video */}
                                 {selectedOffer.youtube_video && extractYouTubeVideoId(selectedOffer.youtube_video) && (
@@ -248,12 +233,14 @@ const PublicOffers = () => {
                                       <Youtube className="w-5 h-5 text-red-500" />
                                       فيديو العرض
                                     </h3>
-                                    <div className="w-full aspect-video">
+                                    <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
                                       <iframe
-                                        src={`https://www.youtube.com/embed/${extractYouTubeVideoId(selectedOffer.youtube_video)}`}
-                                        className="w-full h-full rounded-lg"
+                                        src={`https://www.youtube.com/embed/${extractYouTubeVideoId(selectedOffer.youtube_video)}?rel=0&modestbranding=1`}
+                                        className="w-full h-full"
                                         allowFullScreen
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         title="فيديو العرض"
+                                        frameBorder="0"
                                       />
                                     </div>
                                   </div>
@@ -311,7 +298,7 @@ const PublicOffers = () => {
                                       <div className="mb-4 p-4 bg-white rounded-lg border-l-4 border-amber-600">
                                         <p className="text-sm text-gray-600 mb-1">يبدأ من</p>
                                         <span className="text-2xl font-bold text-amber-700">
-                                          {selectedOffer.base_price}
+                                          {formatPrice(selectedOffer.base_price)}
                                         </span>
                                       </div>
                                     )}
@@ -323,7 +310,7 @@ const PublicOffers = () => {
                                           .map((tier, index) => (
                                             <div key={index} className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
                                               <span className="font-semibold text-gray-700 text-lg">{tier.label}</span>
-                                              <span className="font-bold text-xl text-amber-700">{tier.price}</span>
+                                              <span className="font-bold text-xl text-amber-700">{formatPrice(tier.price)}</span>
                                             </div>
                                           ))}
                                       </div>
@@ -417,6 +404,4 @@ const PublicOffers = () => {
   );
 };
 
-// Add both named and default exports
-export { PublicOffers };
 export default PublicOffers;

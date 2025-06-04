@@ -29,7 +29,8 @@ export interface OfferData {
   carType?: string;
   basePrice: string;
   pricingTiers: PricingTier[];
-  image: File | null;
+  coverImage: File | null;
+  galleryImages: File[];
   description: string;
   travelDates: TravelDates;
   additionalInfo: string;

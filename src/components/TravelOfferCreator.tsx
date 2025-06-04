@@ -7,6 +7,7 @@ import { OfferData } from '@/types/offer';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { LogOut, Plus, List } from 'lucide-react';
+
 export const TravelOfferCreator = () => {
   const {
     user,
@@ -38,7 +39,8 @@ export const TravelOfferCreator = () => {
       label: 'بالغ',
       price: ''
     }],
-    image: null,
+    coverImage: null,
+    galleryImages: [],
     description: '',
     travelDates: {
       start: undefined,
@@ -47,6 +49,7 @@ export const TravelOfferCreator = () => {
     additionalInfo: '',
     youtubeVideo: ''
   });
+
   const handleEditOffer = (offer: any) => {
     // Convert saved offer back to form format, preserving image URL and YouTube video
     setOfferData({
@@ -72,22 +75,24 @@ export const TravelOfferCreator = () => {
         label: 'بالغ',
         price: ''
       }],
-      image: null,
-      // Will be handled by imageUrl
+      coverImage: null,
+      galleryImages: [],
       description: offer.description || '',
       travelDates: offer.travel_dates || {
         start: undefined,
         end: undefined
       },
       additionalInfo: offer.additional_info || '',
-      youtubeVideo: offer.youtube_video || '' // Preserve YouTube video
+      youtubeVideo: offer.youtube_video || ''
     });
     setEditingOffer({
       ...offer,
-      imageUrl: offer.image_url // Preserve the image URL
+      imageUrl: offer.image_url,
+      galleryImages: offer.gallery_images || []
     });
     setActiveTab('create');
   };
+
   const handleNewOffer = () => {
     setEditingOffer(null);
     setOfferData({
@@ -113,7 +118,8 @@ export const TravelOfferCreator = () => {
         label: 'بالغ',
         price: ''
       }],
-      image: null,
+      coverImage: null,
+      galleryImages: [],
       description: '',
       travelDates: {
         start: undefined,
@@ -124,6 +130,7 @@ export const TravelOfferCreator = () => {
     });
     setActiveTab('create');
   };
+
   if (loading) {
     return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 flex items-center justify-center">
         <div className="text-center">
