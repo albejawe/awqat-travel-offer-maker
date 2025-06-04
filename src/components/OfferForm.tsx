@@ -13,6 +13,7 @@ import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
 interface OfferFormProps {
   offerData: OfferData;
   setOfferData: React.Dispatch<React.SetStateAction<OfferData>>;
+  editingOffer?: any;
 }
 
 const countries = ['Turkey', 'UAE', 'UK', 'France', 'Italy', 'Spain', 'Netherlands', 'Thailand', 'Japan', 'Singapore', 'Maldives', 'Indonesia', 'Egypt', 'Morocco', 'South Africa'];
@@ -23,7 +24,8 @@ const carTypes = ['مرسيدس ميني باص', 'تويوتا هايس', 'كو
 
 export const OfferForm: React.FC<OfferFormProps> = ({
   offerData,
-  setOfferData
+  setOfferData,
+  editingOffer
 }) => {
   const addPricingTier = () => {
     setOfferData(prev => ({
@@ -81,39 +83,64 @@ export const OfferForm: React.FC<OfferFormProps> = ({
           <div className="space-y-4">
             <div>
               <Label htmlFor="offerName">اسم العرض</Label>
-              <Input id="offerName" placeholder="مثال: 7 أيام في إسطنبول" value={offerData.name} onChange={e => setOfferData(prev => ({
-              ...prev,
-              name: e.target.value
-            }))} className="mt-1" dir="rtl" />
+              <Input 
+                id="offerName" 
+                placeholder="مثال: 7 أيام في إسطنبول" 
+                value={offerData.name} 
+                onChange={e => setOfferData(prev => ({
+                  ...prev,
+                  name: e.target.value
+                }))} 
+                className="mt-1" 
+                dir="rtl" 
+              />
             </div>
 
             <div>
               <Label htmlFor="country">الدولة</Label>
               <div className="flex gap-2">
-                <Select onValueChange={value => setOfferData(prev => ({
-                ...prev,
-                country: value
-              }))}>
+                <Select 
+                  value={offerData.country}
+                  onValueChange={value => setOfferData(prev => ({
+                    ...prev,
+                    country: value
+                  }))}
+                >
                   <SelectTrigger className="mt-1 flex-1">
                     <SelectValue placeholder="اختر الدولة" />
                   </SelectTrigger>
                   <SelectContent>
-                    {countries.map(country => <SelectItem key={country} value={country}>{country}</SelectItem>)}
+                    {countries.map(country => (
+                      <SelectItem key={country} value={country}>{country}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <Input placeholder="أو اكتب الدولة" value={offerData.customCountry || ''} onChange={e => setOfferData(prev => ({
-                ...prev,
-                customCountry: e.target.value
-              }))} className="mt-1 flex-1" dir="rtl" />
+                <Input 
+                  placeholder="أو اكتب الدولة" 
+                  value={offerData.customCountry || ''} 
+                  onChange={e => setOfferData(prev => ({
+                    ...prev,
+                    customCountry: e.target.value
+                  }))} 
+                  className="mt-1 flex-1" 
+                  dir="rtl" 
+                />
               </div>
             </div>
 
             <div>
               <Label htmlFor="destination">اسم المدينة</Label>
-              <Input id="destination" placeholder="مثال: تقسيم" value={offerData.destination} onChange={e => setOfferData(prev => ({
-              ...prev,
-              destination: e.target.value
-            }))} className="mt-1" dir="rtl" />
+              <Input 
+                id="destination" 
+                placeholder="مثال: تقسيم" 
+                value={offerData.destination} 
+                onChange={e => setOfferData(prev => ({
+                  ...prev,
+                  destination: e.target.value
+                }))} 
+                className="mt-1" 
+                dir="rtl" 
+              />
             </div>
           </div>
         </CardContent>
@@ -308,8 +335,25 @@ export const OfferForm: React.FC<OfferFormProps> = ({
         <CardContent className="p-4">
           <h3 className="font-semibold text-lg mb-4 text-gray-700">صورة العرض</h3>
           <div className="space-y-4">
+            {/* Show existing image if editing */}
+            {editingOffer?.imageUrl && !offerData.image && (
+              <div className="mb-4">
+                <Label>الصورة الحالية</Label>
+                <div className="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                  <img 
+                    src={editingOffer.imageUrl} 
+                    alt="Current offer image" 
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <p className="text-sm text-green-600 mt-2 text-center">
+                    ✓ صورة محفوظة - اختر صورة جديدة للاستبدال
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div>
-              <Label htmlFor="image">رفع صورة</Label>
+              <Label htmlFor="image">رفع صورة {editingOffer?.imageUrl ? '(جديدة)' : ''}</Label>
               <div className="mt-1 flex items-center justify-center w-full">
                 <label htmlFor="image" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">

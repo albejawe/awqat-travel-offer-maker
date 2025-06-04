@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { OfferForm } from './OfferForm';
 import { PDFPreview } from './PDFPreview';
@@ -44,7 +43,7 @@ export const TravelOfferCreator = () => {
   });
 
   const handleEditOffer = (offer: any) => {
-    // Convert saved offer back to form format
+    // Convert saved offer back to form format, preserving image URL and YouTube video
     setOfferData({
       name: offer.name,
       destination: offer.destination || '',
@@ -65,13 +64,16 @@ export const TravelOfferCreator = () => {
       carType: offer.car_type || '',
       basePrice: offer.base_price || '',
       pricingTiers: offer.pricing_tiers || [{ label: 'بالغ', price: '' }],
-      image: null,
+      image: null, // Will be handled by imageUrl
       description: offer.description || '',
       travelDates: offer.travel_dates || { start: undefined, end: undefined },
       additionalInfo: offer.additional_info || '',
-      youtubeVideo: offer.youtube_video || ''
+      youtubeVideo: offer.youtube_video || '' // Preserve YouTube video
     });
-    setEditingOffer(offer);
+    setEditingOffer({
+      ...offer,
+      imageUrl: offer.image_url // Preserve the image URL
+    });
     setActiveTab('create');
   };
 
@@ -203,6 +205,7 @@ export const TravelOfferCreator = () => {
                   <OfferForm 
                     offerData={offerData} 
                     setOfferData={setOfferData}
+                    editingOffer={editingOffer}
                   />
                 </div>
               </div>
