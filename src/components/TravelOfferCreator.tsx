@@ -7,9 +7,12 @@ import { OfferData } from '@/types/offer';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { LogOut, Plus, List } from 'lucide-react';
-
 export const TravelOfferCreator = () => {
-  const { user, loading, signOut } = useAuth();
+  const {
+    user,
+    loading,
+    signOut
+  } = useAuth();
   const [activeTab, setActiveTab] = useState<'create' | 'saved'>('create');
   const [editingOffer, setEditingOffer] = useState<any>(null);
   const [offerData, setOfferData] = useState<OfferData>({
@@ -31,7 +34,10 @@ export const TravelOfferCreator = () => {
     transportation: '',
     carType: '',
     basePrice: '',
-    pricingTiers: [{ label: 'بالغ', price: '' }],
+    pricingTiers: [{
+      label: 'بالغ',
+      price: ''
+    }],
     image: null,
     description: '',
     travelDates: {
@@ -41,7 +47,6 @@ export const TravelOfferCreator = () => {
     additionalInfo: '',
     youtubeVideo: ''
   });
-
   const handleEditOffer = (offer: any) => {
     // Convert saved offer back to form format, preserving image URL and YouTube video
     setOfferData({
@@ -63,10 +68,17 @@ export const TravelOfferCreator = () => {
       transportation: offer.transportation || '',
       carType: offer.car_type || '',
       basePrice: offer.base_price || '',
-      pricingTiers: offer.pricing_tiers || [{ label: 'بالغ', price: '' }],
-      image: null, // Will be handled by imageUrl
+      pricingTiers: offer.pricing_tiers || [{
+        label: 'بالغ',
+        price: ''
+      }],
+      image: null,
+      // Will be handled by imageUrl
       description: offer.description || '',
-      travelDates: offer.travel_dates || { start: undefined, end: undefined },
+      travelDates: offer.travel_dates || {
+        start: undefined,
+        end: undefined
+      },
       additionalInfo: offer.additional_info || '',
       youtubeVideo: offer.youtube_video || '' // Preserve YouTube video
     });
@@ -76,7 +88,6 @@ export const TravelOfferCreator = () => {
     });
     setActiveTab('create');
   };
-
   const handleNewOffer = () => {
     setEditingOffer(null);
     setOfferData({
@@ -98,7 +109,10 @@ export const TravelOfferCreator = () => {
       transportation: '',
       carType: '',
       basePrice: '',
-      pricingTiers: [{ label: 'بالغ', price: '' }],
+      pricingTiers: [{
+        label: 'بالغ',
+        price: ''
+      }],
       image: null,
       description: '',
       travelDates: {
@@ -110,21 +124,16 @@ export const TravelOfferCreator = () => {
     });
     setActiveTab('create');
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 flex items-center justify-center">
+    return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-lg text-gray-600">جارٍ التحميل...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 flex items-center justify-center">
+    return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 flex items-center justify-center">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -136,21 +145,14 @@ export const TravelOfferCreator = () => {
           </div>
           <Auth onAuthChange={() => {}} />
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50">
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              منشئ العروض السياحية
-            </h1>
-            <p className="text-lg text-gray-600">
-              إنشاء عروض سياحية احترافية بسهولة
-            </p>
+            
+            
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
@@ -165,27 +167,18 @@ export const TravelOfferCreator = () => {
 
         <div className="flex justify-center mb-6">
           <div className="flex bg-white rounded-lg p-1 shadow-sm">
-            <Button
-              variant={activeTab === 'create' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('create')}
-              className="flex items-center gap-2"
-            >
+            <Button variant={activeTab === 'create' ? 'default' : 'ghost'} onClick={() => setActiveTab('create')} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               إنشاء عرض جديد
             </Button>
-            <Button
-              variant={activeTab === 'saved' ? 'default' : 'ghost'}
-              onClick={() => setActiveTab('saved')}
-              className="flex items-center gap-2"
-            >
+            <Button variant={activeTab === 'saved' ? 'default' : 'ghost'} onClick={() => setActiveTab('saved')} className="flex items-center gap-2">
               <List className="w-4 h-4" />
               العروض المحفوظة
             </Button>
           </div>
         </div>
 
-        {activeTab === 'create' ? (
-          <div className="max-w-6xl mx-auto">
+        {activeTab === 'create' ? <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
@@ -196,17 +189,11 @@ export const TravelOfferCreator = () => {
                       </span>
                       {editingOffer ? 'تعديل العرض السياحي' : 'إنشاء عرض سياحي'}
                     </h2>
-                    {editingOffer && (
-                      <Button variant="outline" onClick={handleNewOffer}>
+                    {editingOffer && <Button variant="outline" onClick={handleNewOffer}>
                         عرض جديد
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
-                  <OfferForm 
-                    offerData={offerData} 
-                    setOfferData={setOfferData}
-                    editingOffer={editingOffer}
-                  />
+                  <OfferForm offerData={offerData} setOfferData={setOfferData} editingOffer={editingOffer} />
                 </div>
               </div>
 
@@ -218,21 +205,13 @@ export const TravelOfferCreator = () => {
                     </span>
                     معاينة وتصدير
                   </h2>
-                  <PDFPreview 
-                    offerData={offerData} 
-                    editingOffer={editingOffer}
-                    onOfferSaved={() => setActiveTab('saved')}
-                  />
+                  <PDFPreview offerData={offerData} editingOffer={editingOffer} onOfferSaved={() => setActiveTab('saved')} />
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto">
+          </div> : <div className="max-w-4xl mx-auto">
             <SavedOffers onEditOffer={handleEditOffer} user={user} />
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
