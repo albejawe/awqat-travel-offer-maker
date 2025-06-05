@@ -5,16 +5,17 @@ import { OfferData } from '@/types/offer';
 export const saveOffer = async (offerData: OfferData) => {
   try {
     let imageUrl = null;
+    let galleryImageUrls: string[] = [];
 
-    // Upload image if exists
-    if (offerData.image) {
-      const fileExt = offerData.image.name.split('.').pop();
+    // Upload cover image if exists
+    if (offerData.coverImage) {
+      const fileExt = offerData.coverImage.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('offer-images')
-        .upload(filePath, offerData.image);
+        .upload(filePath, offerData.coverImage);
 
       if (uploadError) throw uploadError;
 
@@ -23,6 +24,27 @@ export const saveOffer = async (offerData: OfferData) => {
         .getPublicUrl(filePath);
 
       imageUrl = publicUrl;
+    }
+
+    // Upload gallery images if exist
+    if (offerData.galleryImages && offerData.galleryImages.length > 0) {
+      for (const image of offerData.galleryImages) {
+        const fileExt = image.name.split('.').pop();
+        const fileName = `gallery_${Date.now()}_${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('offer-images')
+          .upload(filePath, image);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('offer-images')
+          .getPublicUrl(filePath);
+
+        galleryImageUrls.push(publicUrl);
+      }
     }
 
     // Get current user
@@ -53,9 +75,11 @@ export const saveOffer = async (offerData: OfferData) => {
         base_price: offerData.basePrice,
         pricing_tiers: offerData.pricingTiers,
         image_url: imageUrl,
+        gallery_images: galleryImageUrls,
         description: offerData.description,
         travel_dates: offerData.travelDates,
         additional_info: offerData.additionalInfo,
+        youtube_video: offerData.youtubeVideo,
         user_id: user.id
       } as any)
       .select()
@@ -72,16 +96,17 @@ export const saveOffer = async (offerData: OfferData) => {
 export const updateOffer = async (id: string, offerData: OfferData) => {
   try {
     let imageUrl = null;
+    let galleryImageUrls: string[] = [];
 
-    // Upload new image if exists
-    if (offerData.image) {
-      const fileExt = offerData.image.name.split('.').pop();
+    // Upload new cover image if exists
+    if (offerData.coverImage) {
+      const fileExt = offerData.coverImage.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('offer-images')
-        .upload(filePath, offerData.image);
+        .upload(filePath, offerData.coverImage);
 
       if (uploadError) throw uploadError;
 
@@ -90,6 +115,27 @@ export const updateOffer = async (id: string, offerData: OfferData) => {
         .getPublicUrl(filePath);
 
       imageUrl = publicUrl;
+    }
+
+    // Upload new gallery images if exist
+    if (offerData.galleryImages && offerData.galleryImages.length > 0) {
+      for (const image of offerData.galleryImages) {
+        const fileExt = image.name.split('.').pop();
+        const fileName = `gallery_${Date.now()}_${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('offer-images')
+          .upload(filePath, image);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('offer-images')
+          .getPublicUrl(filePath);
+
+        galleryImageUrls.push(publicUrl);
+      }
     }
 
     const updateData: any = {
@@ -115,11 +161,16 @@ export const updateOffer = async (id: string, offerData: OfferData) => {
       description: offerData.description,
       travel_dates: offerData.travelDates,
       additional_info: offerData.additionalInfo,
+      youtube_video: offerData.youtubeVideo,
       updated_at: new Date().toISOString()
     };
 
     if (imageUrl) {
       updateData.image_url = imageUrl;
+    }
+
+    if (galleryImageUrls.length > 0) {
+      updateData.gallery_images = galleryImageUrls;
     }
 
     const { data, error } = await supabase

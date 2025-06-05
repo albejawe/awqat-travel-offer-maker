@@ -69,8 +69,8 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({
   };
 
   const getImageUrl = () => {
-    if (offerData.image) {
-      return URL.createObjectURL(offerData.image);
+    if (offerData.coverImage) {
+      return URL.createObjectURL(offerData.coverImage);
     }
     return `https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=800&h=400&fit=crop`;
   };
