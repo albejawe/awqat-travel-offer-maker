@@ -25,6 +25,7 @@ export type Database = {
           departure_time: string | null
           description: string | null
           destination: string | null
+          gallery_images: string[] | null
           hotel: string | null
           id: string
           image_url: string | null
@@ -38,6 +39,7 @@ export type Database = {
           travel_dates: Json | null
           updated_at: string
           user_id: string
+          youtube_video: string | null
         }
         Insert: {
           additional_info?: string | null
@@ -54,6 +56,7 @@ export type Database = {
           departure_time?: string | null
           description?: string | null
           destination?: string | null
+          gallery_images?: string[] | null
           hotel?: string | null
           id?: string
           image_url?: string | null
@@ -67,6 +70,7 @@ export type Database = {
           travel_dates?: Json | null
           updated_at?: string
           user_id: string
+          youtube_video?: string | null
         }
         Update: {
           additional_info?: string | null
@@ -83,6 +87,7 @@ export type Database = {
           departure_time?: string | null
           description?: string | null
           destination?: string | null
+          gallery_images?: string[] | null
           hotel?: string | null
           id?: string
           image_url?: string | null
@@ -96,6 +101,7 @@ export type Database = {
           travel_dates?: Json | null
           updated_at?: string
           user_id?: string
+          youtube_video?: string | null
         }
         Relationships: []
       }
