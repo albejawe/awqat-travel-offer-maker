@@ -404,7 +404,7 @@ export const OfferForm: React.FC<OfferFormProps> = ({
                     dir="rtl" 
                   />
                   {offerData.pricingTiers.length > 1 && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => removePricingTier(index)} className="px-3">
+                    <Button type="button\" variant="outline\" size="sm\" onClick={() => removePricingTier(index)} className="px-3">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
