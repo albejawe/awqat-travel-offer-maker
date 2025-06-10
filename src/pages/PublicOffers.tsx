@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail, Play } from 'lucide-react';
+import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail, Play, Download } from 'lucide-react';
 import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
 import { ImageGallery } from '@/components/ImageGallery';
+import { generatePDF } from '@/utils/pdfGenerator';
 
 const PublicOffers = () => {
   const [offers, setOffers] = useState<any[]>([]);
@@ -50,6 +51,119 @@ const PublicOffers = () => {
     // Remove existing currency symbols and add KWD in Arabic
     const cleanPrice = price.replace(/ريال|د\.ك|KWD|SAR/gi, '').trim();
     return `${cleanPrice} د.ك`;
+  };
+
+  const handleDownloadPDF = async (offer: any) => {
+    // Create a temporary container for PDF generation
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '-9999px';
+    tempContainer.style.width = '794px';
+    tempContainer.style.fontFamily = 'Cairo, sans-serif';
+    tempContainer.style.direction = 'rtl';
+    
+    // Create PDF content similar to PDFPreview component
+    tempContainer.innerHTML = `
+      <div style="background: white; padding: 32px; min-height: 600px; font-family: Cairo, sans-serif; direction: rtl;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 24px; margin-bottom: 24px;">
+          <div style="flex: 1;">
+            <h1 style="font-size: 32px; font-weight: bold; color: #1f2937; margin-bottom: 8px;">${offer.name || 'عرض سياحي'}</h1>
+            ${(offer.destination || offer.country || offer.custom_country) ? `
+              <p style="font-size: 18px; color: #2563eb; font-weight: 600;">
+                📍 ${offer.destination || ''}${(offer.country || offer.custom_country) ? `, ${offer.country || offer.custom_country}` : ''}
+              </p>
+            ` : ''}
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; margin-left: 24px;">
+            <img src="/lovable-uploads/a301b0cc-0db5-40a4-9c35-c8003adb6c82.png" alt="Company Logo" style="width: 80px; height: 80px; object-fit: contain; margin-bottom: 8px;" />
+            <div style="text-align: center;">
+              <h3 style="font-weight: bold; font-size: 18px; color: #2563eb; margin: 0;">شركة أوقات للسياحة والسفر</h3>
+              <p style="color: #6b7280; font-weight: 500; font-size: 14px; margin: 0;">حولي - شارع تونس - بناية هيا</p>
+            </div>
+          </div>
+        </div>
+        
+        ${offer.image_url ? `
+          <div style="width: 100%; height: 256px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); background: #f3f4f6; margin-bottom: 24px;">
+            <img src="${offer.image_url}" alt="Travel destination" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+        ` : ''}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+          <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 20px; border-radius: 12px; border: 1px solid #93c5fd;">
+            <h3 style="font-weight: bold; font-size: 18px; color: #1e40af; margin-bottom: 12px;">✈️ معلومات الطيران</h3>
+            <div style="font-size: 14px;">
+              ${offer.departure_date ? `<p><span style="font-weight: 600;">تاريخ الذهاب:</span> ${offer.departure_date}</p>` : ''}
+              ${offer.return_date ? `<p><span style="font-weight: 600;">تاريخ العودة:</span> ${offer.return_date}</p>` : ''}
+              ${(offer.airline || offer.custom_airline) ? `<p><span style="font-weight: 600;">الطيران:</span> ${offer.custom_airline || offer.airline}</p>` : ''}
+            </div>
+          </div>
+          
+          <div style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding: 20px; border-radius: 12px; border: 1px solid #86efac;">
+            <h3 style="font-weight: bold; font-size: 18px; color: #166534; margin-bottom: 12px;">🏨 معلومات الإقامة</h3>
+            <div style="font-size: 14px;">
+              ${offer.hotel ? `<p><span style="font-weight: 600;">الفندق:</span> ${offer.hotel}</p>` : ''}
+              ${offer.room_type ? `<p><span style="font-weight: 600;">نوع الغرفة:</span> ${offer.room_type}</p>` : ''}
+              ${offer.number_of_people ? `<p><span style="font-weight: 600;">عدد الأشخاص:</span> ${offer.number_of_people}</p>` : ''}
+            </div>
+          </div>
+        </div>
+
+        ${(offer.base_price || (offer.pricing_tiers && offer.pricing_tiers.length > 0)) ? `
+          <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 24px; border-radius: 12px; border: 1px solid #f59e0b; margin-bottom: 24px;">
+            <h3 style="font-weight: bold; font-size: 20px; color: #92400e; margin-bottom: 16px;">💰 الأسعار</h3>
+            ${offer.base_price ? `
+              <div style="margin-bottom: 16px; padding: 16px; background: white; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                <p style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">يبدأ من</p>
+                <span style="font-size: 24px; font-weight: bold; color: #92400e;">${formatPrice(offer.base_price)}</span>
+              </div>
+            ` : ''}
+            ${offer.pricing_tiers && offer.pricing_tiers.length > 0 ? offer.pricing_tiers
+              .filter(tier => tier.label && tier.price)
+              .map(tier => `
+                <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; margin-bottom: 12px;">
+                  <span style="font-weight: 600; color: #374151; font-size: 16px;">${tier.label}</span>
+                  <span style="font-weight: bold; font-size: 18px; color: #92400e;">${formatPrice(tier.price)}</span>
+                </div>
+              `).join('') : ''}
+          </div>
+        ` : ''}
+
+        ${offer.description ? `
+          <div style="background: #f9fafb; padding: 24px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 24px;">
+            <h3 style="font-weight: bold; font-size: 20px; color: #374141; margin-bottom: 16px;">📝 تفاصيل العرض</h3>
+            <div style="color: #374151; white-space: pre-wrap; line-height: 1.6; font-size: 16px;">${offer.description}</div>
+          </div>
+        ` : ''}
+
+        <div style="border-top: 2px solid #2563eb; padding-top: 24px; margin-top: 32px;">
+          <div style="background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%); color: white; padding: 24px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <h3 style="font-weight: bold; font-size: 24px; margin-bottom: 8px;">جاهز للحجز؟</h3>
+                <p style="color: #dbeafe; font-size: 18px;">تواصل معنا للمزيد من المعلومات والحجوزات</p>
+              </div>
+              <div style="text-align: right;">
+                <p style="font-size: 24px; font-weight: bold; margin-bottom: 4px;">📞 22289080</p>
+                <p style="color: #dbeafe;">متاح 24/7</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(tempContainer);
+    
+    try {
+      await generatePDF(tempContainer, offer.name || 'travel-offer');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('حدث خطأ في تحميل الملف');
+    } finally {
+      document.body.removeChild(tempContainer);
+    }
   };
 
   if (loading) {
@@ -211,14 +325,24 @@ const PublicOffers = () => {
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
                             <DialogHeader>
-                              <DialogTitle className="text-2xl font-bold text-right">
-                                {selectedOffer?.name}
-                              </DialogTitle>
+                              <div className="flex items-center justify-between">
+                                <DialogTitle className="text-2xl font-bold text-right">
+                                  {selectedOffer?.name}
+                                </DialogTitle>
+                                <Button
+                                  onClick={() => handleDownloadPDF(selectedOffer)}
+                                  className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
+                                  size="sm"
+                                >
+                                  <Download className="w-4 h-4" />
+                                  تحميل PDF
+                                </Button>
+                              </div>
                             </DialogHeader>
                             {selectedOffer && (
                               <div className="space-y-6" dir="rtl">
                                 {/* Image Gallery */}
-                                <div className="h-64">
+                                <div className="h-96">
                                   <ImageGallery 
                                     coverImage={selectedOffer.image_url}
                                     galleryImages={selectedOffer.gallery_images || []}
@@ -351,6 +475,13 @@ const PublicOffers = () => {
                             )}
                           </DialogContent>
                         </Dialog>
+
+                        <Button
+                          onClick={() => handleDownloadPDF(offer)}
+                          className="bg-amber-600 hover:bg-amber-700 text-white font-medium px-4"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
 
                         <Button
                           asChild
