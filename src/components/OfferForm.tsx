@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { PlusCircle, Trash2, Upload, Youtube, X } from 'lucide-react';
 import { OfferData, PricingTier } from '@/types/offer';
 import { DateRangePicker } from './DateRangePicker';
 import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OfferFormProps {
   offerData: OfferData;
@@ -27,6 +28,26 @@ export const OfferForm: React.FC<OfferFormProps> = ({
   setOfferData,
   editingOffer
 }) => {
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
   const addPricingTier = () => {
     setOfferData(prev => ({
       ...prev,
@@ -113,6 +134,28 @@ export const OfferForm: React.FC<OfferFormProps> = ({
                 className="mt-1" 
                 dir="rtl" 
               />
+            </div>
+
+            <div>
+              <Label htmlFor="category">الفئة</Label>
+              <Select 
+                value={offerData.categoryId || ''}
+                onValueChange={value => setOfferData(prev => ({
+                  ...prev,
+                  categoryId: value
+                }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="اختر الفئة" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

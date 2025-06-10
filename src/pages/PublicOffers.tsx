@@ -1,29 +1,48 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail, Play, Download } from 'lucide-react';
+import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail, Play, Download, ArrowLeft } from 'lucide-react';
 import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
 import { ImageGallery } from '@/components/ImageGallery';
 import { generatePDF } from '@/utils/pdfGenerator';
 
 const PublicOffers = () => {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
 
   useEffect(() => {
-    fetchOffers();
+    fetchCategories();
   }, []);
 
-  const fetchOffers = async () => {
+  const fetchCategories = async () => {
     try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOffersByCategory = async (categoryId: string) => {
+    try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('travel_offers')
         .select('*')
+        .eq('category_id', categoryId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -177,25 +196,170 @@ const PublicOffers = () => {
     );
   }
 
+  // Show categories view
+  if (!selectedCategory) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50" dir="rtl">
+        {/* Header */}
+        <div className="bg-white shadow-lg border-b border-gray-200">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center">
+              <div className="flex justify-center items-center mb-4">
+                <img
+                  src="/lovable-uploads/a301b0cc-0db5-40a4-9c35-c8003adb6c82.png"
+                  alt="شركة أوقات للسياحة والسفر"
+                  className="w-20 h-20 object-contain"
+                />
+              </div>
+              <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                شركة أوقات للسياحة والسفر
+              </h1>
+              <p className="text-xl text-blue-600 mb-4">
+                اكتشف العالم معنا - عروض سياحية مميزة
+              </p>
+              <div className="flex justify-center items-center gap-6 text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Phone className="w-5 h-5" />
+                  <span>22289080</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  <span>حولي - شارع تونس - بناية هيا</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">اختر وجهتك المفضلة</h2>
+            <p className="text-lg text-gray-600">استكشف عروضنا المميزة حسب الوجهة</p>
+          </div>
+
+          {categories.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">لا توجد فئات متاحة حالياً</h2>
+                <p className="text-gray-600">تابعونا قريباً للحصول على أفضل العروض السياحية</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {categories.map((category) => (
+                <Card 
+                  key={category.id} 
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white border-0 shadow-lg cursor-pointer"
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    fetchOffersByCategory(category.id);
+                  }}
+                >
+                  <div className="relative h-48 overflow-hidden">
+                    {category.image_url ? (
+                      <img 
+                        src={category.image_url} 
+                        alt={category.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white">
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">🌍</div>
+                          <div className="text-lg font-semibold">{category.name}</div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {category.min_price && (
+                      <div className="absolute bottom-3 left-3 bg-amber-500 text-white px-4 py-2 rounded-full shadow-lg">
+                        <span className="font-bold text-lg">يبدأ من {formatPrice(category.min_price)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">
+                      {category.name}
+                    </h3>
+                    {category.description && (
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {category.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-blue-600 font-medium">عرض العروض</span>
+                      <ArrowLeft className="w-5 h-5 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <footer className="bg-gray-800 text-white py-8 mt-16">
+          <div className="container mx-auto px-4 text-center">
+            <div className="flex justify-center items-center mb-4">
+              <img
+                src="/lovable-uploads/a301b0cc-0db5-40a4-9c35-c8003adb6c82.png"
+                alt="شركة أوقات للسياحة والسفر"
+                className="w-16 h-16 object-contain"
+              />
+            </div>
+            <h3 className="text-xl font-bold mb-2">شركة أوقات للسياحة والسفر</h3>
+            <p className="text-gray-300 mb-4">رحلات مميزة وذكريات لا تُنسى</p>
+            <div className="flex justify-center items-center gap-8 text-gray-300">
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4" />
+                <span>22289080</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                <span>حولي - شارع تونس - بناية هيا</span>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  // Show offers for selected category
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50" dir="rtl">
       {/* Header */}
       <div className="bg-white shadow-lg border-b border-gray-200">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="flex justify-center items-center mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <Button
+              variant="outline"
+              onClick={() => setSelectedCategory(null)}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              العودة للفئات
+            </Button>
+            <div className="flex justify-center items-center">
               <img
                 src="/lovable-uploads/a301b0cc-0db5-40a4-9c35-c8003adb6c82.png"
                 alt="شركة أوقات للسياحة والسفر"
-                className="w-20 h-20 object-contain"
+                className="w-16 h-16 object-contain"
               />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              شركة أوقات للسياحة والسفر
+            <div></div>
+          </div>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              عروض {selectedCategory.name}
             </h1>
-            <p className="text-xl text-blue-600 mb-4">
-              اكتشف العالم معنا - عروض سياحية مميزة
-            </p>
+            {selectedCategory.description && (
+              <p className="text-lg text-gray-600 mb-4">
+                {selectedCategory.description}
+              </p>
+            )}
             <div className="flex justify-center items-center gap-6 text-gray-600">
               <div className="flex items-center gap-2">
                 <Phone className="w-5 h-5" />
@@ -215,7 +379,7 @@ const PublicOffers = () => {
         {offers.length === 0 ? (
           <div className="text-center py-16">
             <div className="bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">لا توجد عروض متاحة حالياً</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">لا توجد عروض متاحة في هذه الفئة حالياً</h2>
               <p className="text-gray-600">تابعونا قريباً للحصول على أفضل العروض السياحية</p>
             </div>
           </div>

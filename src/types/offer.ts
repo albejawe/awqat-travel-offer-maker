@@ -1,4 +1,3 @@
-
 export interface PricingTier {
   label: string;
   price: string;
@@ -14,6 +13,7 @@ export interface OfferData {
   destination: string;
   country?: string;
   customCountry?: string;
+  categoryId?: string;
   departureDate?: string;
   departureTime?: string;
   returnDate?: string;

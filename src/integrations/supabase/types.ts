@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          min_price: string | null
+          name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          min_price?: string | null
+          name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          min_price?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       travel_offers: {
         Row: {
           additional_info: string | null
@@ -16,6 +49,7 @@ export type Database = {
           airport: string | null
           base_price: string | null
           car_type: string | null
+          category_id: string | null
           country: string | null
           created_at: string
           custom_airline: string | null
@@ -47,6 +81,7 @@ export type Database = {
           airport?: string | null
           base_price?: string | null
           car_type?: string | null
+          category_id?: string | null
           country?: string | null
           created_at?: string
           custom_airline?: string | null
@@ -78,6 +113,7 @@ export type Database = {
           airport?: string | null
           base_price?: string | null
           car_type?: string | null
+          category_id?: string | null
           country?: string | null
           created_at?: string
           custom_airline?: string | null
@@ -103,7 +139,15 @@ export type Database = {
           user_id?: string
           youtube_video?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "travel_offers_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

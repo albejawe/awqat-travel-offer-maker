@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { OfferData } from '@/types/offer';
 
@@ -59,6 +58,7 @@ export const saveOffer = async (offerData: OfferData) => {
         destination: offerData.destination,
         country: offerData.country,
         custom_country: offerData.customCountry,
+        category_id: offerData.categoryId,
         departure_date: offerData.departureDate,
         departure_time: offerData.departureTime,
         return_date: offerData.returnDate,
@@ -143,6 +143,7 @@ export const updateOffer = async (id: string, offerData: OfferData) => {
       destination: offerData.destination,
       country: offerData.country,
       custom_country: offerData.customCountry,
+      category_id: offerData.categoryId,
       departure_date: offerData.departureDate,
       departure_time: offerData.departureTime,
       return_date: offerData.returnDate,

@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { OfferForm } from './OfferForm';
 import { PDFPreview } from './PDFPreview';
 import { SavedOffers } from './SavedOffers';
+import { CategoryManager } from './CategoryManager';
 import { Auth } from './Auth';
 import { OfferData } from '@/types/offer';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Plus, List } from 'lucide-react';
+import { LogOut, Plus, List, FolderOpen } from 'lucide-react';
 
 export const TravelOfferCreator = () => {
   const {
@@ -14,13 +15,14 @@ export const TravelOfferCreator = () => {
     loading,
     signOut
   } = useAuth();
-  const [activeTab, setActiveTab] = useState<'create' | 'saved'>('create');
+  const [activeTab, setActiveTab] = useState<'create' | 'saved' | 'categories'>('create');
   const [editingOffer, setEditingOffer] = useState<any>(null);
   const [offerData, setOfferData] = useState<OfferData>({
     name: '',
     destination: '',
     country: '',
     customCountry: '',
+    categoryId: '',
     departureDate: '',
     departureTime: '',
     returnDate: '',
@@ -57,6 +59,7 @@ export const TravelOfferCreator = () => {
       destination: offer.destination || '',
       country: offer.country || '',
       customCountry: offer.custom_country || '',
+      categoryId: offer.category_id || '',
       departureDate: offer.departure_date || '',
       departureTime: offer.departure_time || '',
       returnDate: offer.return_date || '',
@@ -100,6 +103,7 @@ export const TravelOfferCreator = () => {
       destination: '',
       country: '',
       customCountry: '',
+      categoryId: '',
       departureDate: '',
       departureTime: '',
       returnDate: '',
@@ -182,6 +186,10 @@ export const TravelOfferCreator = () => {
               <List className="w-4 h-4" />
               العروض المحفوظة
             </Button>
+            <Button variant={activeTab === 'categories' ? 'default' : 'ghost'} onClick={() => setActiveTab('categories')} className="flex items-center gap-2">
+              <FolderOpen className="w-4 h-4" />
+              إدارة الفئات
+            </Button>
           </div>
         </div>
 
@@ -216,8 +224,10 @@ export const TravelOfferCreator = () => {
                 </div>
               </div>
             </div>
-          </div> : <div className="max-w-4xl mx-auto">
+          </div> : activeTab === 'saved' ? <div className="max-w-4xl mx-auto">
             <SavedOffers onEditOffer={handleEditOffer} user={user} />
+          </div> : <div className="max-w-6xl mx-auto">
+            <CategoryManager user={user} />
           </div>}
       </div>
     </div>;
