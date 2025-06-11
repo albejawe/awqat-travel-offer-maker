@@ -61,6 +61,9 @@ const Carousel = React.forwardRef<
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
+        dragFree: false,
+        containScroll: "trimSnaps",
+        skipSnaps: false
       },
       plugins
     )
@@ -156,7 +159,7 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="overflow-hidden">
+    <div ref={carouselRef} className="overflow-hidden w-full h-full">
       <div
         ref={ref}
         className={cn(

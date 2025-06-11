@@ -90,11 +90,19 @@ export const ZoomableImageGallery: React.FC<ZoomableImageGalleryProps> = ({
 
   return (
     <>
-      <Carousel className={`w-full h-48 ${className}`}>
-        <CarouselContent>
+      <Carousel 
+        className={`w-full h-48 ${className}`}
+        opts={{
+          align: "start",
+          loop: true,
+          dragFree: false,
+          containScroll: "trimSnaps"
+        }}
+      >
+        <CarouselContent className="-ml-0">
           {allImages.map((imageUrl, index) => (
-            <CarouselItem key={index}>
-              <div className="relative group cursor-pointer">
+            <CarouselItem key={index} className="pl-0 basis-full">
+              <div className="relative group cursor-pointer w-full h-48">
                 <img 
                   src={imageUrl} 
                   alt={`${altText} ${index + 1}`}
