@@ -6,19 +6,46 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from '@/integrations/supabase/client';
 import { MapPin, Calendar, Users, Car, Plane, Building, Youtube, MessageCircle, Phone, Mail, Play, Download, ArrowLeft } from 'lucide-react';
 import { extractYouTubeVideoId } from '@/utils/youtubeUtils';
-import { ImageGallery } from '@/components/ImageGallery';
+import { ZoomableImageGallery } from '@/components/ZoomableImageGallery';
+import { SearchAndFilter } from '@/components/SearchAndFilter';
+import { OfferBadge } from '@/components/OfferBadge';
+import { LoadingSkeleton } from '@/components/LoadingSkeleton';
 import { generatePDF } from '@/utils/pdfGenerator';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 9;
 
 const PublicOffers = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const [offers, setOffers] = useState<any[]>([]);
+  const [filteredOffers, setFilteredOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchOffersByCategory(selectedCategory.id);
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    filterOffers();
+  }, [offers, searchQuery]);
 
   const fetchCategories = async () => {
     try {
@@ -47,11 +74,37 @@ const PublicOffers = () => {
 
       if (error) throw error;
       setOffers(data || []);
+      setCurrentPage(1);
     } catch (error) {
       console.error('Error fetching offers:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterOffers = () => {
+    let filtered = [...offers];
+
+    if (searchQuery) {
+      filtered = filtered.filter(offer =>
+        offer.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        offer.destination?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        offer.hotel?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        offer.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredOffers(filtered);
+    setCurrentPage(1);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilter = (filters: any) => {
+    // Implement additional filtering logic here
+    console.log('Filters applied:', filters);
   };
 
   const formatWhatsAppMessage = (offer: any) => {
@@ -185,12 +238,31 @@ const PublicOffers = () => {
     }
   };
 
+  const getRandomBadge = () => {
+    const badges = ['popular', 'featured', 'new'];
+    return badges[Math.floor(Math.random() * badges.length)] as 'popular' | 'featured' | 'new';
+  };
+
+  const totalPages = Math.ceil(filteredOffers.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedOffers = filteredOffers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">جارٍ تحميل العروض...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-amber-50" dir="rtl">
+        <div className="bg-white shadow-lg border-b border-gray-200">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center">
+              <div className="flex justify-center items-center mb-4">
+                <div className="w-20 h-20 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="h-8 bg-gray-200 rounded animate-pulse mb-4 max-w-md mx-auto"></div>
+              <div className="h-6 bg-gray-200 rounded animate-pulse mb-4 max-w-lg mx-auto"></div>
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-8">
+          <LoadingSkeleton type={selectedCategory ? "offer" : "category"} />
         </div>
       </div>
     );
@@ -247,10 +319,11 @@ const PublicOffers = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((category) => (
+              {categories.map((category, index) => (
                 <Card 
                   key={category.id} 
-                  className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white border-0 shadow-lg cursor-pointer"
+                  className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white border-0 shadow-lg cursor-pointer animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
                   onClick={() => {
                     setSelectedCategory(category);
                     fetchOffersByCategory(category.id);
@@ -261,7 +334,7 @@ const PublicOffers = () => {
                       <img 
                         src={category.image_url} 
                         alt={category.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white">
@@ -374,300 +447,353 @@ const PublicOffers = () => {
         </div>
       </div>
 
-      {/* Offers Grid */}
+      {/* Search and Filter */}
       <div className="container mx-auto px-4 py-8">
-        {offers.length === 0 ? (
+        <SearchAndFilter 
+          onSearch={handleSearch}
+          onFilter={handleFilter}
+          categories={categories}
+        />
+
+        {/* Offers Grid */}
+        {paginatedOffers.length === 0 ? (
           <div className="text-center py-16">
             <div className="bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">لا توجد عروض متاحة في هذه الفئة حالياً</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                {searchQuery ? 'لا توجد عروض تطابق البحث' : 'لا توجد عروض متاحة في هذه الفئة حالياً'}
+              </h2>
               <p className="text-gray-600">تابعونا قريباً للحصول على أفضل العروض السياحية</p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {offers.map((offer) => {
-              const videoId = offer.youtube_video ? extractYouTubeVideoId(offer.youtube_video) : null;
-              const galleryImages = offer.gallery_images || [];
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {paginatedOffers.map((offer, index) => {
+                const videoId = offer.youtube_video ? extractYouTubeVideoId(offer.youtube_video) : null;
+                const galleryImages = offer.gallery_images || [];
 
-              return (
-                <Card key={offer.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white border-0 shadow-lg">
-                  {/* Image/Video Section */}
-                  <div className="relative h-48 overflow-hidden">
-                    <ImageGallery 
-                      coverImage={offer.image_url}
-                      galleryImages={galleryImages}
-                      altText={offer.name}
-                    />
-                    
-                    {/* Video Badge */}
-                    {videoId && (
-                      <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-full flex items-center gap-1 shadow-lg">
-                        <Youtube className="w-4 h-4" />
-                        <span className="text-sm font-medium">فيديو</span>
-                      </div>
-                    )}
-
-                    {/* Price Badge */}
-                    {offer.base_price && (
-                      <div className="absolute bottom-3 left-3 bg-amber-500 text-white px-4 py-2 rounded-full shadow-lg">
-                        <span className="font-bold text-lg">{formatPrice(offer.base_price)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      {/* Title and Location */}
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">
-                          {offer.name}
-                        </h3>
-                        <div className="flex items-center text-blue-600 mb-3">
-                          <MapPin className="w-4 h-4 ml-1" />
-                          <span className="font-medium">
-                            {offer.destination} {offer.country || offer.custom_country}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Quick Info */}
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        {(offer.departure_date || offer.return_date) && (
-                          <div className="flex items-center text-gray-600">
-                            <Calendar className="w-4 h-4 ml-1" />
-                            <span>{offer.departure_date || 'تاريخ مرن'}</span>
-                          </div>
+                return (
+                  <Card 
+                    key={offer.id} 
+                    className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white border-0 shadow-lg animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Image/Video Section */}
+                    <div className="relative h-48 overflow-hidden">
+                      <ZoomableImageGallery 
+                        coverImage={offer.image_url}
+                        galleryImages={galleryImages}
+                        altText={offer.name}
+                      />
+                      
+                      {/* Badges */}
+                      <div className="absolute top-3 right-3 flex flex-col gap-2">
+                        {Math.random() > 0.7 && (
+                          <OfferBadge type={getRandomBadge()} />
                         )}
-                        
-                        {offer.number_of_people && (
-                          <div className="flex items-center text-gray-600">
-                            <Users className="w-4 h-4 ml-1" />
-                            <span>{offer.number_of_people} أشخاص</span>
-                          </div>
-                        )}
-
-                        {(offer.airline || offer.custom_airline) && (
-                          <div className="flex items-center text-gray-600">
-                            <Plane className="w-4 h-4 ml-1" />
-                            <span className="truncate">{offer.custom_airline || offer.airline}</span>
-                          </div>
-                        )}
-
-                        {offer.hotel && (
-                          <div className="flex items-center text-gray-600">
-                            <Building className="w-4 h-4 ml-1" />
-                            <span className="truncate">{offer.hotel}</span>
+                        {videoId && (
+                          <div className="bg-red-600 text-white px-3 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                            <Youtube className="w-4 h-4" />
+                            <span className="text-sm font-medium">فيديو</span>
                           </div>
                         )}
                       </div>
 
-                      {/* Pricing Tiers */}
-                      {offer.pricing_tiers && offer.pricing_tiers.length > 0 && (
-                        <div className="space-y-2">
-                          {offer.pricing_tiers
-                            .filter(tier => tier.label && tier.price)
-                            .slice(0, 2)
-                            .map((tier, index) => (
-                            <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded-lg">
-                              <span className="font-medium text-gray-700">{tier.label}</span>
-                              <span className="font-bold text-amber-600">{formatPrice(tier.price)}</span>
-                            </div>
-                          ))}
+                      {/* Price Badge */}
+                      {offer.base_price && (
+                        <div className="absolute bottom-3 left-3 bg-amber-500 text-white px-4 py-2 rounded-full shadow-lg">
+                          <span className="font-bold text-lg">{formatPrice(offer.base_price)}</span>
                         </div>
                       )}
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 pt-4 border-t border-gray-100">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                              onClick={() => setSelectedOffer(offer)}
-                            >
-                              عرض التفاصيل
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
-                            <DialogHeader>
-                              <div className="flex items-center justify-between">
-                                <DialogTitle className="text-2xl font-bold text-right">
-                                  {selectedOffer?.name}
-                                </DialogTitle>
-                                <Button
-                                  onClick={() => handleDownloadPDF(selectedOffer)}
-                                  className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
-                                  size="sm"
-                                >
-                                  <Download className="w-4 h-4" />
-                                  تحميل PDF
-                                </Button>
-                              </div>
-                            </DialogHeader>
-                            {selectedOffer && (
-                              <div className="space-y-6" dir="rtl">
-                                {/* Image Gallery */}
-                                <div className="h-96">
-                                  <ImageGallery 
-                                    coverImage={selectedOffer.image_url}
-                                    galleryImages={selectedOffer.gallery_images || []}
-                                    altText={selectedOffer.name}
-                                  />
-                                </div>
-
-                                {/* Video */}
-                                {selectedOffer.youtube_video && extractYouTubeVideoId(selectedOffer.youtube_video) && (
-                                  <div>
-                                    <h3 className="font-semibold text-lg text-gray-800 mb-3 text-right flex items-center justify-end gap-2">
-                                      <Youtube className="w-5 h-5 text-red-500" />
-                                      فيديو العرض
-                                    </h3>
-                                    <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
-                                      <iframe
-                                        src={`https://www.youtube.com/embed/${extractYouTubeVideoId(selectedOffer.youtube_video)}?rel=0&modestbranding=1`}
-                                        className="w-full h-full"
-                                        allowFullScreen
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        title="فيديو العرض"
-                                        frameBorder="0"
-                                      />
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Details Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  {/* Flight Info */}
-                                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                    <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
-                                      <Plane className="w-5 h-5" />
-                                      معلومات الطيران
-                                    </h4>
-                                    <div className="space-y-2 text-sm">
-                                      {selectedOffer.departure_date && (
-                                        <p><strong>تاريخ الذهاب:</strong> {selectedOffer.departure_date}</p>
-                                      )}
-                                      {selectedOffer.return_date && (
-                                        <p><strong>تاريخ العودة:</strong> {selectedOffer.return_date}</p>
-                                      )}
-                                      {(selectedOffer.airline || selectedOffer.custom_airline) && (
-                                        <p><strong>شركة الطيران:</strong> {selectedOffer.custom_airline || selectedOffer.airline}</p>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* Hotel Info */}
-                                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                                    <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                                      <Building className="w-5 h-5" />
-                                      معلومات الإقامة
-                                    </h4>
-                                    <div className="space-y-2 text-sm">
-                                      {selectedOffer.hotel && (
-                                        <p><strong>الفندق:</strong> {selectedOffer.hotel}</p>
-                                      )}
-                                      {selectedOffer.room_type && (
-                                        <p><strong>نوع الغرفة:</strong> {selectedOffer.room_type}</p>
-                                      )}
-                                      {selectedOffer.number_of_people && (
-                                        <p><strong>عدد الأشخاص:</strong> {selectedOffer.number_of_people}</p>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Pricing */}
-                                {(selectedOffer.base_price || (selectedOffer.pricing_tiers && selectedOffer.pricing_tiers.length > 0)) && (
-                                  <div className="bg-amber-50 p-6 rounded-lg border border-amber-200">
-                                    <h4 className="font-semibold text-amber-800 mb-4 text-xl flex items-center gap-2">
-                                      💰 الأسعار
-                                    </h4>
-                                    
-                                    {selectedOffer.base_price && (
-                                      <div className="mb-4 p-4 bg-white rounded-lg border-l-4 border-amber-600">
-                                        <p className="text-sm text-gray-600 mb-1">يبدأ من</p>
-                                        <span className="text-2xl font-bold text-amber-700">
-                                          {formatPrice(selectedOffer.base_price)}
-                                        </span>
-                                      </div>
-                                    )}
-                                    
-                                    {selectedOffer.pricing_tiers && selectedOffer.pricing_tiers.length > 0 && (
-                                      <div className="grid grid-cols-1 gap-3">
-                                        {selectedOffer.pricing_tiers
-                                          .filter(tier => tier.label && tier.price)
-                                          .map((tier, index) => (
-                                            <div key={index} className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
-                                              <span className="font-semibold text-gray-700 text-lg">{tier.label}</span>
-                                              <span className="font-bold text-xl text-amber-700">{formatPrice(tier.price)}</span>
-                                            </div>
-                                          ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                {/* Description */}
-                                {selectedOffer.description && (
-                                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                                    <h4 className="font-semibold text-gray-800 mb-4 text-xl">📝 تفاصيل العرض</h4>
-                                    <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                                      {selectedOffer.description}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* WhatsApp Button */}
-                                <div className="bg-green-600 text-white p-6 rounded-lg text-center">
-                                  <h4 className="font-bold text-xl mb-4">📞 احجز الآن أو استفسر</h4>
-                                  <Button
-                                    asChild
-                                    className="bg-white text-green-600 hover:bg-gray-100 font-bold text-lg px-8 py-3"
-                                  >
-                                    <a
-                                      href={formatWhatsAppMessage(selectedOffer)}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="flex items-center gap-2"
-                                    >
-                                      <MessageCircle className="w-5 h-5" />
-                                      تواصل عبر الواتساب
-                                    </a>
-                                  </Button>
-                                  <p className="text-green-100 mt-2">22289080</p>
-                                </div>
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
-
-                        <Button
-                          onClick={() => handleDownloadPDF(offer)}
-                          className="bg-amber-600 hover:bg-amber-700 text-white font-medium px-4"
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-
-                        <Button
-                          asChild
-                          className="bg-green-600 hover:bg-green-700 text-white font-medium px-4"
-                        >
-                          <a
-                            href={formatWhatsAppMessage(offer)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1"
-                          >
-                            <MessageCircle className="w-4 h-4" />
-                            واتساب
-                          </a>
-                        </Button>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        {/* Title and Location */}
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">
+                            {offer.name}
+                          </h3>
+                          <div className="flex items-center text-blue-600 mb-3">
+                            <MapPin className="w-4 h-4 ml-1" />
+                            <span className="font-medium">
+                              {offer.destination} {offer.country || offer.custom_country}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Quick Info */}
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          {(offer.departure_date || offer.return_date) && (
+                            <div className="flex items-center text-gray-600">
+                              <Calendar className="w-4 h-4 ml-1" />
+                              <span>{offer.departure_date || 'تاريخ مرن'}</span>
+                            </div>
+                          )}
+                          
+                          {offer.number_of_people && (
+                            <div className="flex items-center text-gray-600">
+                              <Users className="w-4 h-4 ml-1" />
+                              <span>{offer.number_of_people} أشخاص</span>
+                            </div>
+                          )}
+
+                          {(offer.airline || offer.custom_airline) && (
+                            <div className="flex items-center text-gray-600">
+                              <Plane className="w-4 h-4 ml-1" />
+                              <span className="truncate">{offer.custom_airline || offer.airline}</span>
+                            </div>
+                          )}
+
+                          {offer.hotel && (
+                            <div className="flex items-center text-gray-600">
+                              <Building className="w-4 h-4 ml-1" />
+                              <span className="truncate">{offer.hotel}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Pricing Tiers */}
+                        {offer.pricing_tiers && offer.pricing_tiers.length > 0 && (
+                          <div className="space-y-2">
+                            {offer.pricing_tiers
+                              .filter(tier => tier.label && tier.price)
+                              .slice(0, 2)
+                              .map((tier, index) => (
+                              <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded-lg">
+                                <span className="font-medium text-gray-700">{tier.label}</span>
+                                <span className="font-bold text-amber-600">{formatPrice(tier.price)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 pt-4 border-t border-gray-100">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                                onClick={() => setSelectedOffer(offer)}
+                              >
+                                عرض التفاصيل
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+                              <DialogHeader>
+                                <div className="flex items-center justify-between">
+                                  <DialogTitle className="text-2xl font-bold text-right">
+                                    {selectedOffer?.name}
+                                  </DialogTitle>
+                                  <Button
+                                    onClick={() => handleDownloadPDF(selectedOffer)}
+                                    className="bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-2"
+                                    size="sm"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                    تحميل PDF
+                                  </Button>
+                                </div>
+                              </DialogHeader>
+                              {selectedOffer && (
+                                <div className="space-y-6" dir="rtl">
+                                  {/* Enhanced Image Gallery */}
+                                  <div className="h-96">
+                                    <ZoomableImageGallery 
+                                      coverImage={selectedOffer.image_url}
+                                      galleryImages={selectedOffer.gallery_images || []}
+                                      altText={selectedOffer.name}
+                                    />
+                                  </div>
+
+                                  {/* Video */}
+                                  {selectedOffer.youtube_video && extractYouTubeVideoId(selectedOffer.youtube_video) && (
+                                    <div>
+                                      <h3 className="font-semibold text-lg text-gray-800 mb-3 text-right flex items-center justify-end gap-2">
+                                        <Youtube className="w-5 h-5 text-red-500" />
+                                        فيديو العرض
+                                      </h3>
+                                      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+                                        <iframe
+                                          src={`https://www.youtube.com/embed/${extractYouTubeVideoId(selectedOffer.youtube_video)}?rel=0&modestbranding=1`}
+                                          className="w-full h-full"
+                                          allowFullScreen
+                                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                          title="فيديو العرض"
+                                          frameBorder="0"
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Details Grid */}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Flight Info */}
+                                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                      <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                                        <Plane className="w-5 h-5" />
+                                        معلومات الطيران
+                                      </h4>
+                                      <div className="space-y-2 text-sm">
+                                        {selectedOffer.departure_date && (
+                                          <p><strong>تاريخ الذهاب:</strong> {selectedOffer.departure_date}</p>
+                                        )}
+                                        {selectedOffer.return_date && (
+                                          <p><strong>تاريخ العودة:</strong> {selectedOffer.return_date}</p>
+                                        )}
+                                        {(selectedOffer.airline || selectedOffer.custom_airline) && (
+                                          <p><strong>شركة الطيران:</strong> {selectedOffer.custom_airline || selectedOffer.airline}</p>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Hotel Info */}
+                                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                      <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                                        <Building className="w-5 h-5" />
+                                        معلومات الإقامة
+                                      </h4>
+                                      <div className="space-y-2 text-sm">
+                                        {selectedOffer.hotel && (
+                                          <p><strong>الفندق:</strong> {selectedOffer.hotel}</p>
+                                        )}
+                                        {selectedOffer.room_type && (
+                                          <p><strong>نوع الغرفة:</strong> {selectedOffer.room_type}</p>
+                                        )}
+                                        {selectedOffer.number_of_people && (
+                                          <p><strong>عدد الأشخاص:</strong> {selectedOffer.number_of_people}</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Pricing */}
+                                  {(selectedOffer.base_price || (selectedOffer.pricing_tiers && selectedOffer.pricing_tiers.length > 0)) && (
+                                    <div className="bg-amber-50 p-6 rounded-lg border border-amber-200">
+                                      <h4 className="font-semibold text-amber-800 mb-4 text-xl flex items-center gap-2">
+                                        💰 الأسعار
+                                      </h4>
+                                      {selectedOffer.base_price && (
+                                        <div className="mb-4 p-4 bg-white rounded-lg border-l-4 border-amber-600">
+                                          <p className="text-sm text-gray-600 mb-1">يبدأ من</p>
+                                          <span className="text-2xl font-bold text-amber-700">
+                                            {formatPrice(selectedOffer.base_price)}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {selectedOffer.pricing_tiers && selectedOffer.pricing_tiers.length > 0 && (
+                                        <div className="grid grid-cols-1 gap-3">
+                                          {selectedOffer.pricing_tiers
+                                            .filter(tier => tier.label && tier.price)
+                                            .map((tier, index) => (
+                                              <div key={index} className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
+                                                <span className="font-semibold text-gray-700 text-lg">{tier.label}</span>
+                                                <span className="font-bold text-xl text-amber-700">{formatPrice(tier.price)}</span>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* Description */}
+                                  {selectedOffer.description && (
+                                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                      <h4 className="font-semibold text-gray-800 mb-4 text-xl">📝 تفاصيل العرض</h4>
+                                      <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                        {selectedOffer.description}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* WhatsApp Button */}
+                                  <div className="bg-green-600 text-white p-6 rounded-lg text-center">
+                                    <h4 className="font-bold text-xl mb-4">📞 احجز الآن أو استفسر</h4>
+                                    <Button
+                                      asChild
+                                      className="bg-white text-green-600 hover:bg-gray-100 font-bold text-lg px-8 py-3"
+                                    >
+                                      <a
+                                        href={formatWhatsAppMessage(selectedOffer)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2"
+                                      >
+                                        <MessageCircle className="w-5 h-5" />
+                                        تواصل عبر الواتساب
+                                      </a>
+                                    </Button>
+                                    <p className="text-green-100 mt-2">22289080</p>
+                                  </div>
+                                </div>
+                              )}
+                            </DialogContent>
+                          </Dialog>
+
+                          <Button
+                            onClick={() => handleDownloadPDF(offer)}
+                            className="bg-amber-600 hover:bg-amber-700 text-white font-medium px-4"
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+
+                          <Button
+                            asChild
+                            className="bg-green-600 hover:bg-green-700 text-white font-medium px-4"
+                          >
+                            <a
+                              href={formatWhatsAppMessage(offer)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                              واتساب
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(page)}
+                          isActive={page === currentPage}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         )}
       </div>
 

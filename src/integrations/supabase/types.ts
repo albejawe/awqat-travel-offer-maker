@@ -11,33 +11,33 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string | null
           id: string
           image_url: string | null
           min_price: string | null
           name: string
-          updated_at: string
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           min_price?: string | null
           name: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           min_price?: string | null
           name?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: []
