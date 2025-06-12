@@ -49,15 +49,25 @@ const PublicOffers = () => {
 
   const fetchCategories = async () => {
     try {
+      setLoading(true);
+      console.log('Fetching categories...');
+      
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('Categories response:', { data, error });
+
+      if (error) {
+        console.error('Error fetching categories:', error);
+        throw error;
+      }
+      
       setCategories(data || []);
+      console.log('Categories set:', data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Error in fetchCategories:', error);
     } finally {
       setLoading(false);
     }
@@ -66,17 +76,26 @@ const PublicOffers = () => {
   const fetchOffersByCategory = async (categoryId: string) => {
     try {
       setLoading(true);
+      console.log('Fetching offers for category:', categoryId);
+      
       const { data, error } = await supabase
         .from('travel_offers')
         .select('*')
         .eq('category_id', categoryId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('Offers response:', { data, error });
+
+      if (error) {
+        console.error('Error fetching offers:', error);
+        throw error;
+      }
+      
       setOffers(data || []);
       setCurrentPage(1);
+      console.log('Offers set:', data);
     } catch (error) {
-      console.error('Error fetching offers:', error);
+      console.error('Error in fetchOffersByCategory:', error);
     } finally {
       setLoading(false);
     }
@@ -315,6 +334,9 @@ const PublicOffers = () => {
               <div className="bg-white rounded-xl shadow-lg p-8 max-w-md mx-auto">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">لا توجد فئات متاحة حالياً</h2>
                 <p className="text-gray-600">تابعونا قريباً للحصول على أفضل العروض السياحية</p>
+                <div className="mt-4 text-sm text-gray-500">
+                  <p>Debug info: Categories loaded: {categories.length}</p>
+                </div>
               </div>
             </div>
           ) : (
@@ -325,6 +347,7 @@ const PublicOffers = () => {
                   className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-white border-0 shadow-lg cursor-pointer animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                   onClick={() => {
+                    console.log('Category clicked:', category);
                     setSelectedCategory(category);
                     fetchOffersByCategory(category.id);
                   }}
@@ -463,6 +486,10 @@ const PublicOffers = () => {
                 {searchQuery ? 'لا توجد عروض تطابق البحث' : 'لا توجد عروض متاحة في هذه الفئة حالياً'}
               </h2>
               <p className="text-gray-600">تابعونا قريباً للحصول على أفضل العروض السياحية</p>
+              <div className="mt-4 text-sm text-gray-500">
+                <p>Debug info: Offers loaded: {offers.length}, Filtered: {filteredOffers.length}</p>
+                <p>Category ID: {selectedCategory?.id}</p>
+              </div>
             </div>
           </div>
         ) : (
